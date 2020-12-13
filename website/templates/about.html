@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v4.1.1">
+    <title>Signal & System Final</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/dashboard/">
+
+    <!-- Bootstrap core CSS -->
+<link href= "{{url_for('static',filename='css/bootstrap.min.css')}}" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+    <!-- Custom styles for this template --> <!--
+    <link href= "{{url_for('static',filename='css/dashboard.css')}}" rel="stylesheet">
+    -->
+  <body>
+    <!--Navigation bar-->
+    {% include 'navbar.html' %}
+    
+    
+
+
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">About</h1>
+      </div>
+      <p class="text-justify">109學年度上學期 信號與系統實習期末專題</p>
+      <p class="text-justify">組員：B10707049 黃鈺善、B10707052 許德聖</p>
+      
+      <div class="container mb-4">
+        <div class="row">
+          <div class="col-md-4 p-3">
+          <img src="{{url_for('static',filename='images/loser_selfie.jpg')}}" class="w-50 rounded float-left " alt="許德聖同學">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <p class="text-justify">許德聖同學 (攝於2020-07-25 18:01)</p>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Reference</h1>
+      </div>
+      <a href="https://github.com/shinco0327/SS_FinalProject" class="text-justify" >Project github</a>
+    </main>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="{{url_for('static',filename='js/bootstrap.bundle.min.js')}}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script> 
+        <script src="{{url_for('static',filename='js/dashboard.js')}}"></script>
+        
+         
+</html>
