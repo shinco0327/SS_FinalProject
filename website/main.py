@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, g, session, url_for, flash
+from flask import Flask, render_template, request, redirect, g, session, url_for, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pymongo
 import datetime
+import time
 
 
 # 初始化 Flask 類別成為 instance
@@ -101,13 +102,19 @@ def about():
     return render_template('about.html')
 
 #-------------------------------------------------------------------------------
-#about
+#real_time
 @app.route('/realtime')
 def realtime():
     user,db = check_user()
     if(db ==None):
         return redirect(url_for('login')) 
     return render_template('realtime.html')
+
+#-------------------------------------------------------------------------------
+#get tstamp
+@app.route('/gettstamp')
+def gettstamp(): 
+    return jsonify(timestamp=time.time())
 
 @app.route('/dashboard')
 def dashboard():
