@@ -100,6 +100,15 @@ def about():
         return redirect(url_for('login')) 
     return render_template('about.html')
 
+#-------------------------------------------------------------------------------
+#about
+@app.route('/realtime')
+def realtime():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    return render_template('realtime.html')
+
 @app.route('/dashboard')
 def dashboard():
     user,db = check_user()
