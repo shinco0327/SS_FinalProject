@@ -7,7 +7,7 @@ import time
 
 # 初始化 Flask 類別成為 instance
 app = Flask(__name__)
-conn = pymongo.MongoClient('mongodb://0.0.0.0:27017/')
+conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/')
 
 #-----------------------------------------------------------------------------------
 app.secret_key='zxcasdqwe123'
