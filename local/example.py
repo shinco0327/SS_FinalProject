@@ -80,7 +80,7 @@ while True:
 
         
         ax.set_xlim(PData.axis_x[0], PData.axis_x[0]+5)
-        #ax2.set_xlim(0, 1)
+        ax2.set_xlim(0, 10)
         line.set_xdata(PData.axis_x)
         line.set_ydata(PData.axis_y)
         line2.set_xdata(f[1:])
