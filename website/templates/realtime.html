@@ -31,6 +31,10 @@
           font-size: 3.5rem;
         }
       }
+
+      .hide {
+        display:none; 
+      }
     </style>
     <!-- Custom styles for this template --> <!--
     <link href= "{{url_for('static',filename='css/dashboard.css')}}" rel="stylesheet">
@@ -46,155 +50,69 @@
       </div>
 
       
-
-      <div class="btn-toolbar mb-2 mb-md-0">
-        <div class="btn-group mr-2">
-            <button type="button" class="btn btn-lg btn-outline-primary" data-toggle="collapse" href="#rawcollapse" role="button" aria-expanded="false" aria-controls="rawcollapse">
-              Raw
+      <div class="container-fluid" id="mygroup">
+        <div class="row ">
+          <div class="btn-toolbar mb-md-0">
+              <button type="button" class="btn btn-lg btn-outline-primary mr-2 mb-2" data-toggle="collapse" href="#rawcollapse" role="button" aria-expanded="false" aria-controls="rawcollapse">
+                Raw
+              </button>
+            <button type="button" id="btnFFT" class="btn btn-lg btn-outline-secondary mr-2 mb-2" data-toggle="collapse" href="#choosefft" role="button" aria-expanded="false" aria-controls="choosefft">
+              FFT
             </button>
+          </div>
         </div>
-        <div class="btn-group mr-2">
-            <button type="button" class="btn  btn-lg btn-outline-secondary">FFT</button>
+
+        <div class="collapse mb-2" id="rawcollapse" data-parent="#mygroup">
+          <!--chart-->
+          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-          <span data-feather="calendar"></span>
-          This week
-        </button>
+
+        <div class="collapse mt-2 mb-2" id="choosefft" data-parent="#mygroup">
+          <h4 class="mb-2 ">Choose filters</h4>
+
+          <div class="dropdown mb-2">
+            <button class="btn btn-md btn-outline-secondary dropdown-toggle mb-2" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span data-feather="filter"></span>Filter
+            </button>
+            <ul class="dropdown-menu" id="fftnamecontainer" aria-labelledby="dropdownMenuButton">
+              <li><a class='dropdown-item hide' id='d1'></a></li>
+              <li><a class='dropdown-item hide' id='d2'></a></li>
+              <li><a class='dropdown-item hide' id='d3'></a></li>
+              <li><a class='dropdown-item hide' id='d4'></a></li>
+              <li><a class='dropdown-item hide' id='d5'></a></li>
+              <li><a class='dropdown-item hide' id='d6'></a></li>
+              <li><a class='dropdown-item hide' id='d7'></a></li>
+              <li><a class='dropdown-item hide' id='d8'></a></li>
+              <li><a class='dropdown-item hide' id='d9'></a></li>
+              <li><a class='dropdown-item hide' id='d10'></a></li>
+            </ul>
+          </div>
+          
+          <div class="btn-group-vertical" role="group">
+            <div class="btn-group mb-1" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-primary">3-pt filter</button>
+              <button type="button" class="btn btn-primary">9-pt filter</button>
+              <button type="button" class="btn btn-primary">11-pt filter</button>
+            </div>
+            <div class="btn-group mb-1" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-primary">aaa</button>
+              <button type="button" class="btn btn-primary">bbb</button>
+              <button type="button" class="btn btn-primary">ccc</button>
+            </div>
+            <div class="btn-group mb-1" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-primary">ddd</button>
+              <button type="button" class="btn btn-primary">eee</button>
+              <button type="button" class="btn btn-primary">fff</button>
+            </div>
+          </div>
+
+          
+
+
+        </div>
       </div>
 
-      <div class="collapse" id="rawcollapse">
-        <!--chart-->
-        <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-      </div>
-
-      <h2>Section title</h2>
-      <div class="table-responsive">
-        <table class="table table-striped table-sm">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-              <th>Header</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1,001</td>
-              <td>Lorem</td>
-              <td>ipsum</td>
-              <td>dolor</td>
-              <td>sit</td>
-            </tr>
-            <tr>
-              <td>1,002</td>
-              <td>amet</td>
-              <td>consectetur</td>
-              <td>adipiscing</td>
-              <td>elit</td>
-            </tr>
-            <tr>
-              <td>1,003</td>
-              <td>Integer</td>
-              <td>nec</td>
-              <td>odio</td>
-              <td>Praesent</td>
-            </tr>
-            <tr>
-              <td>1,003</td>
-              <td>libero</td>
-              <td>Sed</td>
-              <td>cursus</td>
-              <td>ante</td>
-            </tr>
-            <tr>
-              <td>1,004</td>
-              <td>dapibus</td>
-              <td>diam</td>
-              <td>Sed</td>
-              <td>nisi</td>
-            </tr>
-            <tr>
-              <td>1,005</td>
-              <td>Nulla</td>
-              <td>quis</td>
-              <td>sem</td>
-              <td>at</td>
-            </tr>
-            <tr>
-              <td>1,006</td>
-              <td>nibh</td>
-              <td>elementum</td>
-              <td>imperdiet</td>
-              <td>Duis</td>
-            </tr>
-            <tr>
-              <td>1,007</td>
-              <td>sagittis</td>
-              <td>ipsum</td>
-              <td>Praesent</td>
-              <td>mauris</td>
-            </tr>
-            <tr>
-              <td>1,008</td>
-              <td>Fusce</td>
-              <td>nec</td>
-              <td>tellus</td>
-              <td>sed</td>
-            </tr>
-            <tr>
-              <td>1,009</td>
-              <td>augue</td>
-              <td>semper</td>
-              <td>porta</td>
-              <td>Mauris</td>
-            </tr>
-            <tr>
-              <td>1,010</td>
-              <td>massa</td>
-              <td>Vestibulum</td>
-              <td>lacinia</td>
-              <td>arcu</td>
-            </tr>
-            <tr>
-              <td>1,011</td>
-              <td>eget</td>
-              <td>nulla</td>
-              <td>Class</td>
-              <td>aptent</td>
-            </tr>
-            <tr>
-              <td>1,012</td>
-              <td>taciti</td>
-              <td>sociosqu</td>
-              <td>ad</td>
-              <td>litora</td>
-            </tr>
-            <tr>
-              <td>1,013</td>
-              <td>torquent</td>
-              <td>per</td>
-              <td>conubia</td>
-              <td>nostra</td>
-            </tr>
-            <tr>
-              <td>1,014</td>
-              <td>per</td>
-              <td>inceptos</td>
-              <td>himenaeos</td>
-              <td>Curabitur</td>
-            </tr>
-            <tr>
-              <td>1,015</td>
-              <td>sodales</td>
-              <td>ligula</td>
-              <td>in</td>
-              <td>libero</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      
     </main>
   </div>
 </div>

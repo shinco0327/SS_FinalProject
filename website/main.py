@@ -10,13 +10,14 @@ app = Flask(__name__)
 conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/')
 
 #-----------------------------------------------------------------------------------
-app.secret_key='zxcasdqwe123'
+app.secret_key= b'%\xab\x9ei\xd6b\x8a\xab\xcd\xb1\xda\x87\x0e\xbd\xae\xb6_\xfd\x98\xf8v\xf2\x8dZ'
 login_manger=LoginManager()
 login_manger.session_protection='strong'
 login_manger.init_app(app)
 
 class User(UserMixin):
     pass
+
 #-------------------------------------------------------------------------------
 def check_user():
     user = current_user.get_id()
@@ -55,11 +56,16 @@ def before_request():
 def index():
     user,db = check_user()
     if(db == None):
-        return render_template('login.html') 
-    return render_template('dashboard.html')
+        return redirect('/login') 
+    return redirect('/dashboard')
 #-------------------------------------------------------------------------------
 @app.route('/login')
-def login():   
+def login():  
+    flash('Please login') 
+    print(request.args.get("error", default=False, type=bool))
+    if request.args.get("error", default=False, type=bool) == True:
+        print("Wrong password")
+        flash('Wrong infornation!!')
     return render_template('login.html') 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -73,7 +79,6 @@ def loginauth():
             print(user_info)
             #驗證帳號
             if user_info is not None and request.form['inputPassword'] == user_info['password']:
-                print(session)
                 curr_user = User()
                 curr_user.id = user_info['username']
                 #通過flask-login的login_user方法登入用戶
@@ -82,13 +87,14 @@ def loginauth():
                 return redirect('/dashboard')
                 
         flash('Wrong infornation!!')
-        return redirect(url_for('login'))
+        return redirect(url_for('login', error=True))
 #-------------------------------------------------------------------------------
 #logout
 @app.route('/logout')
 def logout():
     user = current_user
     user.authenticated = False
+    session.clear()
     logout_user()
     #return redirect('login.html') 
     return redirect(url_for('login'))
@@ -110,6 +116,11 @@ def realtime():
         return redirect(url_for('login')) 
     return render_template('realtime.html')
 
+#-------------------------------------------------------------------------------
+@app.route('/getfiltertype')
+def getfiltertype():
+    list1 = ['third', 'nine', 'eleven']
+    return jsonify(listfilter = list1)
 #-------------------------------------------------------------------------------
 #get tstamp
 @app.route('/gettstamp')

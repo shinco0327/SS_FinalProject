@@ -50,10 +50,55 @@
       }
     }
   })
-})()
 
-//Change_current_time
-var sync_time=function(e){ //
+  //FFT page
+  $("#btnFFT").click(function(){
+    if($("#choosefft").hasClass("collapse") && !$("#choosefft").hasClass("show") ){
+      $.getJSON('/getfiltertype',{   
+      },function(data){     
+        //get all filter name   
+        var listfilter = data.listfilter;
+        //append to drop down menu  
+        //var ul = document.getElementById('fftnamecontainer');
+        //var str1 = ''
+        for(var i in listfilter){
+          //str1 += '<li><a class="dropdown-item">'+listfilter[i]+'</a></li>';
+          //var li = document.createElement("li");
+          //var a = document.createElement("a");
+          //a.className = "dropdown-item";
+          //a.appendChild(document.createTextNode(listfilter[i]));
+          //li.appendChild(a);
+          //ul.appendChild(li);
+          var locate = parseInt(i)+ 1;
+          $('#'+'d'+locate).removeClass("hide");
+          $('#'+'d'+locate).text(listfilter[i]);
+        }
+        //ul.innerHTML = str1;
+        console.log(listfilter);
+        //open dropdown
+        if ($('.dropdown').find('.dropdown-menu').is(":hidden")){
+          $('.dropdown-toggle').dropdown('toggle');
+        }
+      });
+    }
+  });
+
+ 
+  
+  
+  $('#fftnamecontainer a').on('click', function(e){
+    var selText = $(this).text();
+    alert(selText);
+  });
+
+  //auto refresh
+  setInterval(function () {
+    sync_time();
+  }, 1000);
+
+
+  //Change_current_time
+  var sync_time=function(e){ //
     $.getJSON('/gettstamp',{   
     },function(data){     
         var time = new Date(data.timestamp *1000);
@@ -75,10 +120,13 @@ var sync_time=function(e){ //
         }
         $('#currentTime').text('Current Time ' + hours + ' : ' + minutes + ' : '+ seconds);
     });
-};
+  };
 
-//auto refresh
-setInterval(function () {
-    sync_time();
-}, 1000);
+})()
+
+
+
+
+
+
 
