@@ -51,6 +51,11 @@
 
       
       <div class="container-fluid" id="mygroup">
+        <div class="row mb-2">
+          <div class="alert alert-danger container-fluid" id="showoffline" role="alert" style="display:none">
+            <span data-feather="alert-triangle"  style="font-size:30px; vertical-align: middle;"></span><strong  style="vertical-align: middle;">&nbsp; Device Offline!</strong>
+          </div>
+        </div>
         <div class="row ">
           <div class="btn-toolbar mb-md-0">
               <button type="button" class="btn btn-lg btn-outline-primary mr-2 mb-2" data-toggle="collapse" href="#rawcollapse" role="button" aria-expanded="false" aria-controls="rawcollapse">
@@ -63,8 +68,11 @@
         </div>
 
         <div class="collapse mb-2" id="rawcollapse" data-parent="#mygroup">
-          <!--chart-->
-          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+          <!--chart  <canvas class="my-4 w-100" id="myChart" width="900" height="450"></canvas>-->
+          <div class="chart-container" style="position: relative; height:50vh; width:80vw" >
+            <canvas class="my-4 w-100" id="myChart"></canvas>
+        </div>
+          
         </div>
 
         <div class="collapse mt-2 mb-2" id="choosefft" data-parent="#mygroup">

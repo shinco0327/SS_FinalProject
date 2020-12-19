@@ -126,7 +126,18 @@ def getfiltertype():
 @app.route('/gettstamp')
 def gettstamp(): 
     return jsonify(timestamp=time.time())
-
+#-------------------------------------------------------------------------------
+@app.route('/checkalive')
+def checkalive():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    list1 = list(db.device.find())
+    if(list1 != []):
+        alive = list1[0].get('alive', False)
+    db.device.update_many({},{'$set':{'alive': False}})
+    return jsonify(alive=alive)
+#-------------------------------------------------------------------------------
 @app.route('/dashboard')
 def dashboard():
     user,db = check_user()
