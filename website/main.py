@@ -3,6 +3,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import pymongo
 import datetime
 import time
+import json
+from bson import ObjectId
 
 
 # 初始化 Flask 類別成為 instance
@@ -17,6 +19,13 @@ login_manger.init_app(app)
 
 class User(UserMixin):
     pass
+
+#For ObjectID to json
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
 
 #-------------------------------------------------------------------------------
 def check_user():
@@ -137,6 +146,51 @@ def checkalive():
         alive = list1[0].get('alive', False)
     db.device.update_many({},{'$set':{'alive': False}})
     return jsonify(alive=alive)
+#-------------------------------------------------------------------------------
+#return  raw data 
+@app.route('/getrawdata', methods=['GET', 'POST'])
+def getrawdata():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    count = request.args.get("count", type=int)
+    if count == None:
+        return jsonify(start_oid=None, count=0, value=[], time=[])
+    print(count)
+    if count == 0:  #Draw New Chart
+        datalist = list(db.real_time.find({'time':{'$gte': datetime.datetime.now() - datetime.timedelta(seconds=1.5)}}))
+        print(datalist)
+        if datalist == []:
+            return jsonify(start_oid=None, count=0, value=[], time=[])
+        json_start_oid = JSONEncoder().encode(datalist[0].get('_id', ''))
+        valuelist = []
+        timelist = []
+        for i in datalist:
+            if i.get('value', None) != None:
+                valuelist.append(i.get('value', None))
+                timelist.append(datetime.datetime.timestamp(i.get('time', None)))
+        return jsonify(start_oid=json_start_oid, count=len(valuelist), value=valuelist, time=timelist)
+    elif count > 0:   #Update chart
+        str_start_oid = request.args.get('start_oid', type=str)
+        str1_start_oid =  str_start_oid.replace("\"", "")
+        start_oid = ObjectId(str1_start_oid)
+        json_start_oid = JSONEncoder().encode(start_oid)
+        
+        valuelist = []
+        datalist = list(db.real_time.find({"_id":{"$gte": start_oid}}).skip(count))
+        if datalist == []:
+            return jsonify(start_oid=json_start_oid, count=count, value=[], time=[])
+        valuelist = []
+        timelist = []
+        for i in datalist:
+            if i.get('value', None) != None:
+                valuelist.append(i.get('value', None))
+                timelist.append(datetime.datetime.timestamp(i.get('time', None)))
+        
+        
+        return jsonify(start_oid=json_start_oid, count=len(valuelist)+count, value=valuelist, time=timelist)
+
+    return jsonify(start_oid=None, count=0, value=[], time=[])
 #-------------------------------------------------------------------------------
 @app.route('/dashboard')
 def dashboard():

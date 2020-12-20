@@ -6,12 +6,15 @@
   feather.replace()
   
   var intervel_10 = 0;
+  var intervel_100 = 0;
   var dps = []; // dataPoints
   // Graphs
   var ctx = document.getElementById("myChart");
 
+  var data = {};
+  /*
   var data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: [],
     datasets: [{
       
       lineTension: 0,
@@ -29,27 +32,30 @@
       pointHighlightFill: "#fff",
       pointHighlightStroke: "rgba(151,187,205,1)",
       data: [87, 87, 87,87 ,87,87,87]
-    } */]
-  };
-  var options = {
+    } ]
+  };  */
+
+  var options = { 
     animation: false,
     //Boolean - If we want to override with a hard coded scale
-    scaleOverride: true,
-    //** Required if scaleOverride is true **
-    //Number - The number of steps in a hard coded scale
-    scaleSteps: 10,
-    //Number - The value jump in the hard coded scale
-    scaleStepWidth: 10,
-    //Number - The scale starting value
-    scaleStartValue: 0,
+    
+    
     elements: {
       point:{
           radius: 0
       }},
+    scaleShowValues: true,  
     scales: {
+      xAxes: [{
+        ticks: {
+          autoSkip: false
+        }
+      }],
       yAxes: [{
         ticks: {
-          beginAtZero: false
+          beginAtZero: true,
+          min: 0,
+          max: 1000
         }
       }]
     },
@@ -59,82 +65,48 @@
   };
 
   //var myLineChart = new Chart(ctx).Line(data, options);
+  /*
   var myLineChart = new Chart(ctx , {
     type: "line",
     data: data,
     options: options 
 });
+*/
 
   
 
-  function setLabels(labels) {
-    var nextMonthIndex = months.indexOf(labels[labels.length - 1]) + 1;
-    var nextMonthName = months[nextMonthIndex] != undefined ? months[nextMonthIndex] : "January";
-    labels.push(nextMonthName);
-    labels.shift();
-  }
-
-  function setData(data) {
-    data.push(Math.floor(Math.random() * 100) + 1);
-    data.shift();
-  }
-  
-  function convertMonthNameToNumber(monthName) {
-    var myDate = new Date(monthName + " 1, 2016");
-    var monthDigit = myDate.getMonth();
-    return isNaN(monthDigit) ? 0 : (monthDigit + 1);
-  }
-  
-  var months = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-
-  /*
-  // eslint-disable-next-line no-unused-vars
-  var myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-      ],
-      datasets: [{
-        data: [
-          15339,
-          21345,
-          18483,
-          24003,
-          23489,
-          24092,
-          12034
-        ],
-        lineTension: 0,
-        backgroundColor: 'transparent',
-        borderColor: '#007bff',
-        borderWidth: 4,
-        pointBackgroundColor: '#007bff'
-      }]
-    },
-    options: {
-      scales: {
-        yAxes: [{
-          ticks: {
-            beginAtZero: false
-          }
-        }]
-      },
-      legend: {
-        display: false
+  function setLabels(old_labels, new_labels) {
+    if(new_labels != []){
+      old_labels.push.apply(old_labels, new_labels)
+      if(old_labels.length > 500){
+        old_labels.splice(0, 250);
       }
+      
     }
-  })
-  */
+  }
+
+  function setData(old_data, new_data) {
+    //console.log("Old data: " + old_data.length)
+    //console.log("data: "+new_data.length)
+    if(new_data != []){
+      /*
+      var a = old_data.length/10
+      var b = ~~a; //boom!
+      old_data.splice(0, b);
+      */
+     old_data.push.apply(old_data, new_data); 
+     if(old_data.length > 500){
+        old_data.splice(0, 250);
+      }
+      
+      //console.log("New data: "+old_data.length);
+    }
+  }
+  
+  
+
+
+ 
 
   //FFT page
   $("#btnFFT").click(function(){
@@ -144,16 +116,9 @@
         //get all filter name   
         var listfilter = data.listfilter;
         //append to drop down menu  
-        //var ul = document.getElementById('fftnamecontainer');
-        //var str1 = ''
+        
         for(var i in listfilter){
-          //str1 += '<li><a class="dropdown-item">'+listfilter[i]+'</a></li>';
-          //var li = document.createElement("li");
-          //var a = document.createElement("a");
-          //a.className = "dropdown-item";
-          //a.appendChild(document.createTextNode(listfilter[i]));
-          //li.appendChild(a);
-          //ul.appendChild(li);
+          
           var locate = parseInt(i)+ 1;
           $('#'+'d'+locate).removeClass("hide");
           $('#'+'d'+locate).text(listfilter[i]);
@@ -168,7 +133,112 @@
     }
   });
 
+  var start_oid;
+  var count = 0;
+  var past_timestamp = 0;
+  var past_seconds = -1;
+  //Raw page
+  $("#btnRaw").click(function(){
+    if($("#rawcollapse").hasClass("collapse") && !$("#rawcollapse").hasClass("show") ){
+      console.log("count: 0");
+      count = 0;
+      past_seconds = -1;
+      $.getJSON('/getrawdata',{start_oid: start_oid, count: count}
+      ,function(return_dict){ 
+        //console.log(return_dict.start_oid); 
+        //console.log(return_dict.count);   
+        //console.log(return_dict.value);
+        start_oid = return_dict.start_oid;
+        count = return_dict.count;
+        var timelist = return_dict.time;
+        var label = [];    
+        for(var i=0; i<timelist.length; i++){
+          if(past_seconds < 0){
+            past_seconds = 0;
+            label.push(past_seconds);
+            past_timestamp = timelist[i];
+          }
+          if(timelist[i] - past_timestamp >= 1){
+            past_seconds += 1;
+            label.push(past_seconds);
+            past_timestamp = timelist[i];
+          }else{
+            label.push('');
+          }
+        }
+        
+        
+        //data['datasets']['data'] = return_dict.value;
+        data = {
+          labels: label,
+          datasets: [{
+            
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff',  
+            data: return_dict.value
+          }]};
+        console.log(data)
+        var myLineChart = new Chart(ctx , {
+          type: "line",
+          data: data,
+          options: options 
+        });
+
+
+        });
+      }
+  });
  
+
+  var update_chart = function(e){
+    if($("#rawcollapse").hasClass("show")){
+      if(data != {}){
+        $.getJSON('/getrawdata',{start_oid: start_oid, count: count}
+        ,function(return_dict){ 
+          console.log(return_dict.start_oid); 
+          console.log(return_dict.count);   
+          console.log(return_dict.value);
+          start_oid = return_dict.start_oid;
+          count = return_dict.count;
+          var timelist = return_dict.time;
+          var label = [];    
+          for(var i=0; i<timelist.length; i++){
+            if(past_seconds < 0){
+              past_seconds = 0;
+              label.push(past_seconds);
+              past_timestamp = timelist[i];
+            }
+            else if(timelist[i] - past_timestamp >= 1){
+              past_seconds += 1;
+              label.push(past_seconds);
+              past_timestamp = timelist[i];
+            }else{
+              label.push('');
+            }
+            
+          }
+          //alert("value: "+ return_dict.value.length +"\ntime: "+ label.length);
+          
+          
+          setData(data.datasets[0].data, return_dict.value);
+          setLabels(data.labels, label);
+        });
+
+        //setData(data.datasets[0].data);
+        //setData(data.datasets[1].data);
+        //setLabels(data.labels);
+        
+        var myLineChart = new Chart(ctx , {
+          type: "line",
+          data: data,
+          options: options 
+        });
+      }
+    }
+  };
   
   
   $('#fftnamecontainer a').on('click', function(e){
@@ -178,22 +248,25 @@
 
   //auto refresh
   setInterval(function () {
-    sync_time();
-    setData(data.datasets[0].data);
-    //setData(data.datasets[1].data);
-    setLabels(data.labels);
-    var myLineChart = new Chart(ctx , {
-      type: "line",
-      data: data,
-      options: options 
-    });
+    
+
+    update_chart();
+
     intervel_10 += 1;
-    if(intervel_10 == 9){
+    if(intervel_10 >= 1){
       intervel_10 = 0;
+      sync_time();
+    }
+    
+    
+    
+    intervel_100 += 1;
+    if(intervel_100 >= 19){
+      intervel_100 = 0;
       check_alive();
     }
   
-  }, 1000);
+  }, 500);
 
 
   //Change_current_time
@@ -226,7 +299,7 @@
     //$('#showoffline').hide();
     $.getJSON('/checkalive',{   
     },function(data){     
-      console.log(data.alive);
+      //console.log(data.alive);
       if(data.alive == false){ $('#showoffline').show();}
       else{ $('#showoffline').hide();}
     });
