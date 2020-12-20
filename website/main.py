@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, g, session, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, g, session, url_for, flash, jsonify, Response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import pymongo
 import datetime
@@ -146,6 +146,10 @@ def checkalive():
         alive = list1[0].get('alive', False)
     db.device.update_many({},{'$set':{'alive': False}})
     return jsonify(alive=alive)
+#-------------------------------------------------------------------------------
+@app.route('/systemtime')
+def systemtime():
+    return Response(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mimetype='text')
 #-------------------------------------------------------------------------------
 #return  raw data 
 @app.route('/getrawdata', methods=['GET', 'POST'])
