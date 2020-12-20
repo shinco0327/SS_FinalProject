@@ -50,36 +50,51 @@ ser = serial.Serial(strPort, 115200)
 ser.flush()
 
 start = time.time()
+total = 0
+count = 0
+old_fs = 0
 
 while True:
     try:
         x_time = []
         y_value = []
-        for ii in range(20):
+        for ii in range(10):
 
             try:
                 data = float(ser.readline())
                 x_time.append(time.time() - start)
                 y_value.append(data)
+                total += data
+                count += 1
                 
                 
             except:
                 pass
-        
-        
-        y = signal.lfilter([1/9, 1/9, 1/9,1/9, 1/9, 1/9,1/9, 1/9, 1/9], 1, (y_value-np.mean(y_value)))
-        PData.add(x_time, (y_value-np.mean(y_value)), y)
-        f =np.arange(0, 125, 1)
+        ava = total / count
+        y_pretty = y_value - np.full(len(y_value), ava)
         fs = 1/((x_time[len(x_time)-1]-x_time[0])/len(x_time))
+        fs = (fs+old_fs)/2
+        old_fs = fs
+        print(fs)
+        sos = signal.butter(6, 3.8, 'lowpass', fs=(fs), output='sos')
+        y = signal.sosfilt(sos, y_pretty)
+        y *= np.exp(8.5)
+        #y1 = signal.lfilter([1/9, 1/9, 1/9,1/9, 1/9, 1/9,1/9, 1/9, 1/9], 1, y)
+        #y = signal.lfilter([1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11,1/11, 1/11], 1, y_pretty)
+        if count > 9:
+            total = 0
+            count = 0
+        PData.add(x_time, y_pretty, y)
+        f =np.arange(0, 125, 1)
         z = [] 
         t = np.arange(0, len(y_value)/fs, 1/fs) 
         for i in range(0,125):
             x = np.cos(2*np.pi*i*t)
-            y = signal.lfilter([1/9, 1/9, 1/9,1/9, 1/9, 1/9,1/9, 1/9, 1/9], 1, x)
+            y = signal.lfilter([1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11,1/11, 1/11], 1, x)
             z.append(max(y))   
 
-        print(x)
-        print(z)
+        
+        
         
         ax.set_xlim(PData.axis_x[0], PData.axis_x[0]+5)
         ax2.set_xlim(PData.axis_x[0], PData.axis_x[0]+5)
@@ -95,6 +110,8 @@ while True:
 
         
         
-    except KeyboardInterrupt:
-        break
-        pass
+    except Exception as e:
+        if e == KeyboardInterrupt:
+            break
+        else:
+            pass

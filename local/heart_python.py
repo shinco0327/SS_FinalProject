@@ -38,7 +38,7 @@ ax2.set_ylim(-5,5)
 # plot parameters
 print ('plotting data...')
 # open serial port
-strPort='com4'
+strPort='com8'
 ser = serial.Serial(strPort, 115200)
 ser.flush()
 
