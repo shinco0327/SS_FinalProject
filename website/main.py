@@ -158,7 +158,7 @@ def getrawdata():
         return jsonify(start_oid=None, count=0, value=[], time=[])
     print(count)
     if count == 0:  #Draw New Chart
-        datalist = list(db.real_time.find({'time':{'$gte': datetime.datetime.now() - datetime.timedelta(seconds=1.5)}}))
+        datalist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1.5))}}))
         print(datalist)
         if datalist == []:
             return jsonify(start_oid=None, count=0, value=[], time=[])
@@ -177,7 +177,7 @@ def getrawdata():
         json_start_oid = JSONEncoder().encode(start_oid)
         
         valuelist = []
-        datalist = list(db.real_time.find({"_id":{"$gte": start_oid}}).skip(count))
+        datalist = list(db.real_time.find({"_id":{"$gte": start_oid}}).skip(count).max_time_ms(300).limit(500))
         if datalist == []:
             return jsonify(start_oid=json_start_oid, count=count, value=[], time=[])
         valuelist = []

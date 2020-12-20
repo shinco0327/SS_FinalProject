@@ -79,7 +79,7 @@
     if(new_labels != []){
       old_labels.push.apply(old_labels, new_labels)
       if(old_labels.length > 500){
-        old_labels.splice(0, 250);
+        old_labels.splice(0, 70);
       }
       
     }
@@ -96,7 +96,7 @@
       */
      old_data.push.apply(old_data, new_data); 
      if(old_data.length > 500){
-        old_data.splice(0, 250);
+        old_data.splice(0, 70);
       }
       
       //console.log("New data: "+old_data.length);
