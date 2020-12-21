@@ -35,6 +35,7 @@
       .hide {
         display:none; 
       }
+       
     </style>
     <!-- Custom styles for this template --> <!--
     <link href= "{{url_for('static',filename='css/dashboard.css')}}" rel="stylesheet">
@@ -49,36 +50,76 @@
             <h4 class="mb-2 mb-md-0" id="currentTime">Loading</h4>
         </div>
         <div class="mt-4 mb-2">
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Time</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hide" id="t0">
+                            <th scope="row" id="t0num">0</th>
+                            <td id="t0name">NULL</td>
+                            <td id="t0type">NULL</td>
+                            <td id="t0time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t1">
+                            <th scope="row" id="t1num">0</th>
+                            <td id="t1name">NULL</td>
+                            <td id="t1type">NULL</td>
+                            <td id="t1time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t2">
+                            <th scope="row" id="t2num">0</th>
+                            <td id="t2name">NULL</td>
+                            <td id="t2type">NULL</td>
+                            <td id="t2time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t3">
+                            <th scope="row" id="t3num">0</th>
+                            <td id="t3name">NULL</td>
+                            <td id="t3type">NULL</td>
+                            <td id="t3time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t4">
+                            <th scope="row" id="t4num">0</th>
+                            <td id="t4name">NULL</td>
+                            <td id="t4type">NULL</td>
+                            <td id="t4time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t5">
+                            <th scope="row" id="t5num">0</th>
+                            <td id="t5name">NULL</td>
+                            <td id="t5type">NULL</td>
+                            <td id="t5time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t6">
+                            <th scope="row" id="t6num">0</th>
+                            <td id="t6name">NULL</td>
+                            <td id="t6type">NULL</td>
+                            <td id="t6time">NULL</td>
+                        </tr>
+                        <tr class="hide" id="t7">
+                            <th scope="row" id="t7num">0</th>
+                            <td id="t7name">NULL</td>
+                            <td id="t7type">NULL</td>
+                            <td id="t7time">NULL</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>    
+            <div class="d-flex justify-content-end mb-md-0">
+                <button type="button" id="btn_lastpage" class="btn btn-dark mr-2 mb-4 hide" >
+                  Last Pages
+                </button>
+              <button type="button" id="btn_nextpage" class="btn btn-dark mr-2 mb-4 hide" >
+                Next Pages
+              </button>
+            </div>
         </div>
         
       

@@ -201,6 +201,17 @@ def savechartrecord():
     except:
         return jsonify(successful=False)
 #-------------------------------------------------------------------------------   
+#Get list of history record
+@app.route('/gethistorylist')
+def gethistorylist():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    historylist = list(db.history_overview.find({}))
+    for i in historylist:
+        i.pop('_id', None)
+    return jsonify(historylist=historylist)
+#-------------------------------------------------------------------------------   
 @app.route('/dashboard')
 def dashboard():
     user,db = check_user()
