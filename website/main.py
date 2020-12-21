@@ -107,23 +107,6 @@ def logout():
     logout_user()
     #return redirect('login.html') 
     return redirect(url_for('login'))
-#-------------------------------------------------------------------------------
-
-@app.route('/about')
-def about():
-    user,db = check_user()
-    if(db ==None):
-        return redirect(url_for('login')) 
-    return render_template('about.html')
-
-#-------------------------------------------------------------------------------
-#real_time
-@app.route('/realtime')
-def realtime():
-    user,db = check_user()
-    if(db ==None):
-        return redirect(url_for('login')) 
-    return render_template('realtime.html')
 
 #-------------------------------------------------------------------------------
 @app.route('/getfiltertype')
@@ -160,7 +143,7 @@ def getrawdata():
     count = request.args.get("count", type=int)
     if count == None:
         return jsonify(start_oid=None, count=0, value=[], time=[])
-    print(count)
+    #print(count)
     if count == 0:  #Draw New Chart
         datalist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1.5))}}))
         print(datalist)
@@ -196,12 +179,57 @@ def getrawdata():
 
     return jsonify(start_oid=None, count=0, value=[], time=[])
 #-------------------------------------------------------------------------------
+@app.route('/savechartrecord')
+def savechartrecord():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    try:    
+        str_reference_oid = request.args.get('reference_oid', type=str)
+        reference_oid = ObjectId(str_reference_oid.replace("\"", ""))
+        reference_end = request.args.get("reference_end", type=int)
+        start_position = request.args.get('start_position', type=int)
+        type_of_record = request.args.get('type_of_record', type=str)
+        name = request.args.get('name', type=str)
+        datalist = list(db.real_time.find({"_id":{"$gte": reference_oid}}).skip(start_position).limit(reference_end+1-start_position))
+        #print(datalist)
+        for i in datalist:
+            i['name_of_record'] = name
+        db.history_overview.insert_one({'name': name, 'type_of_record':type_of_record, 'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
+        db.history_realtime.insert_many(datalist)
+        return jsonify(successful=True)
+    except:
+        return jsonify(successful=False)
+#-------------------------------------------------------------------------------   
 @app.route('/dashboard')
 def dashboard():
     user,db = check_user()
     if(db ==None):
         return redirect(url_for('login')) 
     return render_template('dashboard.html')
+#-------------------------------------------------------------------------------
+@app.route('/history')
+def history():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    return render_template('history.html')
+#-------------------------------------------------------------------------------
+@app.route('/about')
+def about():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    return render_template('about.html')
+#-------------------------------------------------------------------------------
+#real_time
+@app.route('/realtime')
+def realtime():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    return render_template('realtime.html')
+
 
 # 判斷自己執行非被當做引入的模組，因為 __name__ 這變數若被當做模組引入使用就不會是 __main__
 if __name__ == '__main__':

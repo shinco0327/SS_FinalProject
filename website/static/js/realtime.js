@@ -5,9 +5,11 @@
 
   feather.replace()
   
-  var intervel_10 = 0;
-  var intervel_100 = 0;
-  var dps = []; // dataPoints
+  var interval_10 = 0;
+  var interval_100 = 0;
+  
+
+  //---------------------------------------------------------
   // Graphs
   var ctx = document.getElementById("myChart");
 
@@ -104,9 +106,54 @@
   }
   
   
+  var update_chart = function(e){
+    if($("#rawcollapse").hasClass("show")){
+      if(data != {}){
+        $.getJSON('/getrawdata',{start_oid: start_oid, count: count}
+        ,function(return_dict){ 
+          console.log(return_dict.start_oid); 
+          console.log(return_dict.count);   
+          console.log(return_dict.value);
+          start_oid = return_dict.start_oid;
+          count = return_dict.count;
+          var timelist = return_dict.time;
+          var label = [];    
+          for(var i=0; i<timelist.length; i++){
+            if(past_seconds < 0){
+              past_seconds = 0;
+              label.push(past_seconds);
+              past_timestamp = timelist[i];
+            }
+            else if(timelist[i] - past_timestamp >= 1){
+              past_seconds += 1;
+              label.push(past_seconds);
+              past_timestamp = timelist[i];
+            }else{
+              label.push('');
+            }
+            
+          }
+          //alert("value: "+ return_dict.value.length +"\ntime: "+ label.length);
+          
+          
+          setData(data.datasets[0].data, return_dict.value);
+          setLabels(data.labels, label);
+        });
 
+        //setData(data.datasets[0].data);
+        //setData(data.datasets[1].data);
+        //setLabels(data.labels);
+        
+        var myLineChart = new Chart(ctx , {
+          type: "line",
+          data: data,
+          options: options 
+        });
+      }
+    }
+  };
 
- 
+ //---------------------------------------------------------
 
   //FFT page
   $("#btnFFT").click(function(){
@@ -139,6 +186,9 @@
   var past_seconds = -1;
   //Raw page
   $("#btnRaw").click(function(){
+    if(is_recording){
+      stop_record();
+    }
     if($("#rawcollapse").hasClass("collapse") && !$("#rawcollapse").hasClass("show") ){
       console.log("count: 0");
       count = 0;
@@ -193,52 +243,7 @@
   });
  
 
-  var update_chart = function(e){
-    if($("#rawcollapse").hasClass("show")){
-      if(data != {}){
-        $.getJSON('/getrawdata',{start_oid: start_oid, count: count}
-        ,function(return_dict){ 
-          console.log(return_dict.start_oid); 
-          console.log(return_dict.count);   
-          console.log(return_dict.value);
-          start_oid = return_dict.start_oid;
-          count = return_dict.count;
-          var timelist = return_dict.time;
-          var label = [];    
-          for(var i=0; i<timelist.length; i++){
-            if(past_seconds < 0){
-              past_seconds = 0;
-              label.push(past_seconds);
-              past_timestamp = timelist[i];
-            }
-            else if(timelist[i] - past_timestamp >= 1){
-              past_seconds += 1;
-              label.push(past_seconds);
-              past_timestamp = timelist[i];
-            }else{
-              label.push('');
-            }
-            
-          }
-          //alert("value: "+ return_dict.value.length +"\ntime: "+ label.length);
-          
-          
-          setData(data.datasets[0].data, return_dict.value);
-          setLabels(data.labels, label);
-        });
-
-        //setData(data.datasets[0].data);
-        //setData(data.datasets[1].data);
-        //setLabels(data.labels);
-        
-        var myLineChart = new Chart(ctx , {
-          type: "line",
-          data: data,
-          options: options 
-        });
-      }
-    }
-  };
+  
   
   
   $('#fftnamecontainer a').on('click', function(e){
@@ -252,23 +257,72 @@
 
     update_chart();
 
-    intervel_10 += 1;
-    if(intervel_10 >= 1){
-      intervel_10 = 0;
+    interval_10 += 1;
+    if(interval_10 >= 1){
+      interval_10 = 0;
       sync_time();
     }
     
     
     
-    intervel_100 += 1;
-    if(intervel_100 >= 19){
-      intervel_100 = 0;
+    interval_100 += 1;
+    if(interval_100 >= 19){
+      interval_100 = 0;
       check_alive();
+    }
+
+    if(is_recording == true){
+      $("#btn_record").hide();
+      $("#btn_recording").show();
+    }
+    else{
+      $("#btn_record").show();
+      $("#btn_recording").hide();
     }
   
   }, 500);
 
+ 
+  
+  //---------------------------------------------------------
+  //Record raw
+  var is_recording = false;
+  var record_start_position = 0;
+  $('#btn_record').on('click', function(e){
+    is_recording = true;
+    if(data.datasets[0].data != []){
+      record_start_position = count - data.datasets[0].data.length;
+    }
+    else{
+      record_start_position = 0;
+    }
+  });
+  $('#btn_recording').on('click', function(e){
+    stop_record();
+  });
 
+  var stop_record =function(e){
+    is_recording = false;
+    var record_name = prompt("Please enter name of this record", "record"+Date.now());
+    while(1){
+      if (record_name == null || record_name == "") {
+        record_name = prompt("Please enter name of this record", "record"+Date.now());
+      } else {
+        break;
+      }
+    }
+    //alert("start_oid: "+start_oid+"\n start_position: "+record_start_position+"\n endlength: "+count);
+    $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, type_of_record:"RAW", name:record_name}
+    ,function(return_dict){ 
+      if(return_dict.successful == true){
+        alert("Saved!");
+      }else{
+        alert("Error!");
+      }
+      });
+  };
+  //---------------------------------------------------------
+ 
   //Change_current_time
   var sync_time=function(e){ //
     $.getJSON('/gettstamp',{   

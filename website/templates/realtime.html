@@ -44,7 +44,7 @@
     {% include 'navbar.html' %}
 
     <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" >
         <h1 class="h2">Realtime</h1>
         <h4 class="mb-2 mb-md-0" id="currentTime">Loading</h4>
       </div>
@@ -69,8 +69,12 @@
 
         <div class="collapse mb-2" id="rawcollapse" data-parent="#mygroup">
           <!--chart  <canvas class="my-4 w-100" id="myChart" width="900" height="450"></canvas>-->
-          <div class="chart-container" style="position: relative; height:50vh; width:75vw" >
-            <canvas class="my-4 w-100" id="myChart"></canvas>
+          <div class="chart-container" style="position: relative; height:50vh; width:75vw; max-width: 1024px" >
+            <canvas class="my-4 w-100 mb-2" id="myChart"></canvas>
+            <button type="button" class="btn mb-2 btn-lg" style="color: #dc3545;
+            border-color: #dc3545;" id="btn_record">Record</button>
+            <button type="button" class="btn mb-2 btn-lg" style="color: #fff;
+            background-color: #dc3545; border-color: #dc3545;" id="btn_recording">Recording</button>
         </div>
           
         </div>
