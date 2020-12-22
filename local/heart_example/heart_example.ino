@@ -35,57 +35,63 @@ pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
-// Turn off LED
-digitalWrite(ledPin, LOW);
+    // Turn off LED
+    digitalWrite(ledPin, LOW);
 
-// Read analogue pin.
-newHeartReading = analogRead(sensePin);
-//Serial.println(newHeartReading);
-//Calculate Delta
-Delta = newHeartReading - lastHeartReading;
-lastHeartReading = newHeartReading;
+    // Read analogue pin.
+    newHeartReading = analogRead(sensePin);
+    //Serial.println(newHeartReading);
+    //Calculate Delta
+    Delta = newHeartReading - lastHeartReading;
+    lastHeartReading = newHeartReading;
 
-// Find new recent total
-recentTotal = recentTotal - recentReadings[readingsIndex] + Delta;
-// replace indexed recent value
-recentReadings[readingsIndex] = Delta;
-// increment index
-readingsIndex = (readingsIndex + 1) % historySize;
+    // Find new recent total
+    recentTotal = recentTotal - recentReadings[readingsIndex] + Delta;
+    // replace indexed recent value
+    recentReadings[readingsIndex] = Delta;
+    // increment index
+    readingsIndex = (readingsIndex + 1) % historySize;
 
-//Debug
-//Serial.println(recentTotal);
+    //Debug
+    //Serial.println(recentTotal);
+    //Serial.print("[");
+    //for(int i=0; i<8; i++){
+    //    Serial.print(recentReadings[i]);
+    //    Serial.print(" ");
+    //}
+    //Serial.println(" ]");  
 
-// Decide whether to start an LED Blink.
-if (recentTotal >= totalThreshold) {
-// Possible heartbeart, check time
-if (millis() - lastHeartbeatTime >= debounceDelay) {
-// Heartbeat
-digitalWrite(ledPin, HIGH);
-currentHeartrate = 60000 / (millis() - lastHeartbeatTime);
-Heartrate[indh++]=currentHeartrate;
-for(i=0;i<Heartratebuf;i++)
-{
-aveHeartrate += Heartrate[i];
-}
-aveHeartrate =aveHeartrate/Heartratebuf;
-if(indh==Heartratebuf)
-indh=0;
+    // Decide whether to start an LED Blink.
+    if (recentTotal >= totalThreshold) {
+        // Possible heartbeart, check time
+        if (millis() - lastHeartbeatTime >= debounceDelay) {
+            // Heartbeat
+            digitalWrite(ledPin, HIGH);
+            currentHeartrate = 60000 / (millis() - lastHeartbeatTime);
+            Heartrate[indh++]=currentHeartrate;
+            for(i=0;i<Heartratebuf;i++)
+            {
+                aveHeartrate += Heartrate[i];
+            }
+            aveHeartrate =aveHeartrate/Heartratebuf;
+            if(indh==Heartratebuf)
+                indh=0;
 
-lastHeartbeatTime = millis();
+            lastHeartbeatTime = millis();
 
-// Print Results
-//Serial.println("Beat");
-//Serial.print("AVER:"); 
-//Serial.println(aveHeartrate);
-if (currentHeartrate <= aveHeartrate && currentHeartrate<= 200) 
-{
-Serial.print("Beat:"); 
-Serial.println(currentHeartrate); 
-} 
-aveHeartrate=0;
+            // Print Results
+            //Serial.println("Beat");
+            //Serial.print("AVER:"); 
+            //Serial.println(aveHeartrate);
+            if (currentHeartrate <= aveHeartrate && currentHeartrate<= 200) 
+            {
+                Serial.print("Beat:"); 
+                Serial.println(currentHeartrate); 
+            } 
+            aveHeartrate=0;
 
-} 
-} 
-delay(10); 
+        } 
+    } 
+    delay(10); 
 } 
 
