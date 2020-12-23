@@ -83,7 +83,7 @@
       if(old_labels.length > 500){
         old_labels.splice(0, 70);
       }
-      
+      new_labels = [];
     }
   }
 
@@ -96,11 +96,11 @@
       var b = ~~a; //boom!
       old_data.splice(0, b);
       */
-     old_data.push.apply(old_data, new_data); 
-     if(old_data.length > 500){
+      old_data.push.apply(old_data, new_data); 
+      if(old_data.length > 500){
         old_data.splice(0, 70);
       }
-      
+      new_data = [];
       //console.log("New data: "+old_data.length);
     }
   }
@@ -304,22 +304,21 @@
   var stop_record =function(e){
     is_recording = false;
     var record_name = prompt("Please enter name of this record", "record"+Date.now());
-    while(1){
-      if (record_name == null || record_name == "") {
-        record_name = prompt("Please enter name of this record", "record"+Date.now());
-      } else {
-        break;
-      }
-    }
-    //alert("start_oid: "+start_oid+"\n start_position: "+record_start_position+"\n endlength: "+count);
-    $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, type_of_record:"RAW", name:record_name}
-    ,function(return_dict){ 
-      if(return_dict.successful == true){
-        alert("Saved!");
-      }else{
-        alert("Error!");
-      }
+
+    if (record_name == null || record_name == "") {
+      alert("Canceled!");
+    } else {
+        //alert("start_oid: "+start_oid+"\n start_position: "+record_start_position+"\n endlength: "+count);
+      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, type_of_record:"RAW", name:record_name}
+      ,function(return_dict){ 
+        if(return_dict.successful == true){
+          alert("Saved!");
+        }else{
+          alert("Error!");
+        }
+        count = 0;
       });
+    }  
   };
   //---------------------------------------------------------
  
@@ -354,8 +353,13 @@
     $.getJSON('/checkalive',{   
     },function(data){     
       //console.log(data.alive);
-      if(data.alive == false){ $('#showoffline').show();}
-      else{ $('#showoffline').hide();}
+      if(data.alive == false){ 
+        $('#showoffline').show();
+        count = 0;
+      }
+      else{ 
+        $('#showoffline').hide();
+    }
     });
   };
   check_alive()

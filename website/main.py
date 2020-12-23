@@ -4,7 +4,10 @@ import pymongo
 import datetime
 import time
 import json
+import threading
 from bson import ObjectId
+import numpy as np
+import collections
 
 
 # 初始化 Flask 類別成為 instance
@@ -51,6 +54,7 @@ def load_user(user):
     if user_info is not None:
         curr_user = User()
         curr_user.id = user_info['username']
+        
         return curr_user
 #-------------------------------------------------------------------------------
 @app.before_request
@@ -92,7 +96,7 @@ def loginauth():
                 curr_user.id = user_info['username']
                 #通過flask-login的login_user方法登入用戶
                 login_user(curr_user)
-                
+                user,db = check_user()
                 return redirect('/dashboard')
                 
         flash('Wrong infornation!!')
@@ -121,13 +125,7 @@ def gettstamp():
 #-------------------------------------------------------------------------------
 @app.route('/checkalive')
 def checkalive():
-    user,db = check_user()
-    if(db ==None):
-        return redirect(url_for('login')) 
-    list1 = list(db.device.find())
-    if(list1 != []):
-        alive = list1[0].get('alive', False)
-    db.device.update_many({},{'$set':{'alive': False}})
+    global alive
     return jsonify(alive=alive)
 #-------------------------------------------------------------------------------
 @app.route('/systemtime')
@@ -164,7 +162,7 @@ def getrawdata():
         json_start_oid = JSONEncoder().encode(start_oid)
         
         valuelist = []
-        datalist = list(db.real_time.find({"_id":{"$gte": start_oid}}).skip(count).max_time_ms(300).limit(500))
+        datalist = list(db.real_time.find({"_id":{"$gte": start_oid}}).skip(count).max_time_ms(300).limit(100))
         if datalist == []:
             return jsonify(start_oid=json_start_oid, count=count, value=[], time=[])
         valuelist = []
@@ -217,6 +215,7 @@ def dashboard():
     user,db = check_user()
     if(db ==None):
         return redirect(url_for('login')) 
+    
     return render_template('dashboard.html')
 #-------------------------------------------------------------------------------
 @app.route('/history')
@@ -241,7 +240,105 @@ def realtime():
         return redirect(url_for('login')) 
     return render_template('realtime.html')
 
+#-------------------------------------------------------------------------------
+#get calculated heart rated
+@app.route('/getheartrate')
+def getheartrate():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    global heartrate
+    return jsonify(heartrate=heartrate)
+
+#-------------------------------------------------------------------------------
+#Thread will calculate heartrate
+heartrate = {'heartrate': 0, 'mode': 'unauth'}
+
+def thread_calt_heart_rate(db):
+    global heartrate
+    recentReading = [0, 0, 0, 0, 0, 0, 0, 0]
+    HeartrateBuff = collections.deque([0, 0, 0, 0, 0, 0, 0, 0], maxlen=8)
+    ava_rate = collections.deque([0, 0, 0], maxlen=3)
+    lastRead = 0
+    lastBeattime = time.time()
+    lastreturntime = time.time()
+    Recenttrend = 0
+    readingsIndex = 0
+    while 1:
+        firstlist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1.5))}}).limit(1))
+        last_oid = None
+        if(firstlist == [] or firstlist[0].get('_id', None) == None):
+            heartrate = {'heartrate': 0, 'mode': 'disconnect'}
+            continue
+        else:
+            last_oid = firstlist[0].get('_id', None)
+          
+
+        if(firstlist[0].get('time', None) == None):
+            lastBeattime = time.time()
+        else:
+            lastBeattime = datetime.datetime.timestamp(firstlist[0].get('time', None))
+
+        heartrate = {'heartrate': 0, 'mode': 'measuring'}
+
+
+        while 1:
+            datalist = list(db.real_time.find({"_id":{"$gt": last_oid}}).max_time_ms(300).limit(50))
+            for data in datalist:
+                newRead = data.get('value', 0)
+                #print(newRead)
+                delta = newRead - lastRead
+                lastRead = newRead
+
+                #Recenttrend = Recenttrend - np.mean(recentReading) + delta
+                Recenttrend = Recenttrend - recentReading[readingsIndex] + delta
+                recentReading[readingsIndex] = delta
+                readingsIndex = (readingsIndex + 1) % len(recentReading)
+                #print(Recenttrend)
+            
+                if(Recenttrend >= 2 and datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime >= 0.150):
+                    #print(60/(time.time()-lastBeattime))
+                    currenHearttrate = 60/(datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime)
+                    HeartrateBuff.append(currenHearttrate)
+                    avg = np.average(HeartrateBuff)
+                    lastBeattime = datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))
+                    if(currenHearttrate < 200 and currenHearttrate > 50):
+                        ava_rate.append(currenHearttrate)
+                        #print("BEAT: ", "%.2f" % np.average(ava_rate))
+                        heartrate = {'heartrate': "%.2f" % np.average(ava_rate), 'mode': 'done'}
+                        lastreturntime = time.time()
+            if(time.time() - lastreturntime >= 5):
+                heartrate = {'heartrate': 0, 'mode': 'measuring'}
+                break
+
+            if(datalist != []):
+                last_oid = datalist[-1].get("_id", None)
+        
+#-------------------------------------------------------------------------------
+#Thread will detect device offline
+alive = False
+def thread_checkalive(db):
+    global alive
+    offline_count = 0
+    while(1):
+        list1 = list(db.device.find())
+        if(list1 != []):
+            d_state = list1[0].get('alive', False)
+            if d_state == True:
+                offline_count = 0
+            else:
+                offline_count +=1
+        db.device.update_many({},{'$set':{'alive': False}})
+        alive = False if (offline_count >= 4) else True
+        time.sleep(2.5)
+#-------------------------------------------------------------------------------
 
 # 判斷自己執行非被當做引入的模組，因為 __name__ 這變數若被當做模組引入使用就不會是 __main__
 if __name__ == '__main__':
+    t1 = threading.Thread(target=thread_calt_heart_rate, args=(conn['admin'],))
+    t1.daemon = True
+    t1.start()
+    t2 = threading.Thread(target=thread_checkalive, args=(conn['admin'],))
+    t2.daemon = True
+    t2.start()
     app.run(host="0.0.0.0", port="5000", debug=True)
