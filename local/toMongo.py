@@ -42,6 +42,7 @@ update_dict = []
 db = conn['admin']
 
 thread_push_mongo = threading.Thread(target=push_mongo)
+thread_push_mongo.daemon = True
 thread_push_mongo.start()
 
 while 1:
