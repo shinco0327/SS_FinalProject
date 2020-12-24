@@ -45,7 +45,7 @@ ax3.set_ylim(0,1)
 # plot parameters
 print ('plotting data...')
 # open serial port
-strPort='com8'
+strPort='com4'
 ser = serial.Serial(strPort, 115200)
 ser.flush()
 
@@ -67,7 +67,7 @@ while True:
                 pass
         
         
-        y = signal.lfilter([1/9, 1/9, 1/9,1/9, 1/9, 1/9,1/9, 1/9, 1/9], 1, (y_value-np.mean(y_value)))
+        y = signal.lfilter([1/5,1/5,1/5,1/5,1/5], 1, (y_value-np.mean(y_value)))
         PData.add(x_time, (y_value-np.mean(y_value)), y)
         f =np.arange(0, 125, 1)
         fs = 1/((x_time[len(x_time)-1]-x_time[0])/len(x_time))
@@ -75,11 +75,11 @@ while True:
         t = np.arange(0, len(y_value)/fs, 1/fs) 
         for i in range(0,125):
             x = np.cos(2*np.pi*i*t)
-            y = signal.lfilter([1/9, 1/9, 1/9,1/9, 1/9, 1/9,1/9, 1/9, 1/9], 1, x)
+            y = signal.lfilter([1/5,1/5,1/5,1/5,1/5], 1, x)
             z.append(max(y))   
 
-        print(x)
-        print(z)
+        #print(x)
+        #print(z)
         
         ax.set_xlim(PData.axis_x[0], PData.axis_x[0]+5)
         ax2.set_xlim(PData.axis_x[0], PData.axis_x[0]+5)
