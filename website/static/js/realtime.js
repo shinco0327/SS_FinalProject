@@ -77,7 +77,7 @@
   
   
   var update_chart = function(e){
-    if($("#Graphcollapse0").hasClass("show")){
+    if($("#Graphcollapse0").hasClass("show") || $("#Graphcollapse1").hasClass("show")){
       if(data != {}){
         $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
         ,function(return_dict){ 
