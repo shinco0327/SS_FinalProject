@@ -115,7 +115,7 @@ def logout():
 #-------------------------------------------------------------------------------
 @app.route('/getfiltertype')
 def getfiltertype():
-    list1 = ['third', 'nine', 'eleven']
+    list1 = ['third', 'nine-pt', 'eleven']
     return jsonify(listfilter = list1)
 #-------------------------------------------------------------------------------
 #get tstamp
@@ -160,8 +160,8 @@ def getgraphdata():
         if(graphmode == "RAW"):
             fix_valuelist = valuelist
         elif(graphmode == "DCF"):
-            fix_valuelist = valuelist - np.mean(valuelist)
-        return jsonify(start_oid=json_start_oid, count=len(valuelist), value=fix_valuelist.tolist(), time=timelist)
+            fix_valuelist = (valuelist - np.mean(valuelist)).tolist()
+        return jsonify(start_oid=json_start_oid, count=len(valuelist), value=fix_valuelist, time=timelist)
     elif count > 0:   #Update chart
         str_start_oid = request.args.get('start_oid', type=str)
         str1_start_oid =  str_start_oid.replace("\"", "")
@@ -182,8 +182,8 @@ def getgraphdata():
         if(graphmode == "RAW"):
             fix_valuelist = valuelist
         elif(graphmode == "DCF"):
-            fix_valuelist = valuelist - np.mean(valuelist)
-        return jsonify(start_oid=json_start_oid, count=len(valuelist)+count, value=fix_valuelist.tolist(), time=timelist)
+            fix_valuelist = (valuelist - np.mean(valuelist)).tolist()
+        return jsonify(start_oid=json_start_oid, count=len(valuelist)+count, value=fix_valuelist, time=timelist)
 
     return jsonify(start_oid=None, count=0, value=[], time=[])
 #-------------------------------------------------------------------------------

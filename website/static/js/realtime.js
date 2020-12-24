@@ -11,32 +11,11 @@
 
   //---------------------------------------------------------
   // Graphs
-  var ctx = document.getElementById("myChart");
+  var ctx0 = document.getElementById("myChart0");
+  var ctx1 = document.getElementById("myChart1");
 
   var data = {};
-  /*
-  var data = {
-    labels: [],
-    datasets: [{
-      
-      lineTension: 0,
-      backgroundColor: 'transparent',
-      borderColor: '#007bff',
-      borderWidth: 4,
-      pointBackgroundColor: '#007bff',  
-      data: []
-    } /*, {
-      label: "My Second dataset",
-      fillColor: "rgba(151,187,205,0.2)",
-      strokeColor: "rgba(151,187,205,1)",
-      pointColor: "rgba(151,187,205,1)",
-      pointStrokeColor: "#fff",
-      pointHighlightFill: "#fff",
-      pointHighlightStroke: "rgba(151,187,205,1)",
-      data: [87, 87, 87,87 ,87,87,87]
-    } ]
-  };  */
-
+  
   var options = { 
     animation: false,
     //Boolean - If we want to override with a hard coded scale
@@ -55,7 +34,7 @@
       }],
       yAxes: [{
         ticks: {
-          beginAtZero: true,
+          //beginAtZero: true,
           min: 0,
           max: 1000
         }
@@ -65,15 +44,6 @@
       display: false
     }
   };
-
-  //var myLineChart = new Chart(ctx).Line(data, options);
-  /*
-  var myLineChart = new Chart(ctx , {
-    type: "line",
-    data: data,
-    options: options 
-});
-*/
 
   
 
@@ -107,7 +77,7 @@
   
   
   var update_chart = function(e){
-    if($("#Graphcollapse").hasClass("show")){
+    if($("#Graphcollapse0").hasClass("show")){
       if(data != {}){
         $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
         ,function(return_dict){ 
@@ -134,8 +104,6 @@
             
           }
           //alert("value: "+ return_dict.value.length +"\ntime: "+ label.length);
-          
-          
           setData(data.datasets[0].data, return_dict.value);
           setLabels(data.labels, label);
         });
@@ -143,12 +111,19 @@
         //setData(data.datasets[0].data);
         //setData(data.datasets[1].data);
         //setLabels(data.labels);
-        
-        var myLineChart = new Chart(ctx , {
-          type: "line",
-          data: data,
-          options: options 
-        });
+        if(GraphMode == 'RAW'){
+          var myLineChart = new Chart(ctx0 , {
+            type: "line",
+            data: data,
+            options: options 
+          });
+        }else if(GraphMode == 'DCF'){
+          var myLineChart = new Chart(ctx1 , {
+            type: "line",
+            data: data,
+            options: options 
+          });
+        }
       }
     }
   };
@@ -187,22 +162,30 @@
   var GraphMode = '';
   //Raw page
   $("#btnRaw").click(function(){
-    GraphProcessing();
     GraphMode = "RAW";
+    GraphProcessing();
   });
 
   //DCF page
   $("#btnDCF").click(function(){
-    GraphProcessing();
     GraphMode = "DCF";
+    GraphProcessing();
   });
  
 
   var GraphProcessing = function(e){
+    console.log(options);
+    if(GraphMode == "RAW"){
+      options.scales.yAxes[0].ticks.min = 0;
+      options.scales.yAxes[0].ticks.max = 1000;
+    }else if(GraphMode == "DCF"){
+      options.scales.yAxes[0].ticks.min = -5;
+      options.scales.yAxes[0].ticks.max = 15;
+    }
     if(is_recording){
       stop_record();
     }
-    if($("#Graphcollapse").hasClass("collapse") && !$("#Graphcollapse").hasClass("show") ){
+    if($("#Graphcollapse1").hasClass("collapse") && !$("#Graphcollapse1").hasClass("show") ){
       console.log("count: 0");
       count = 0;
       past_seconds = -1;
@@ -242,11 +225,19 @@
             data: return_dict.value
           }]};
         console.log(data)
-        var myLineChart = new Chart(ctx , {
-          type: "line",
-          data: data,
-          options: options 
-        });
+        if(GraphMode == "RAW"){
+          var myLineChart = new Chart(ctx0 , {
+            type: "line",
+            data: data,
+            options: options 
+          });
+        }else if(GraphMode == "DCF"){
+          var myLineChart = new Chart(ctx1 , {
+            type: "line",
+            data: data,
+            options: options 
+          });
+        }
 
 
         });
@@ -280,12 +271,16 @@
     }
 
     if(is_recording == true){
-      $("#btn_record").hide();
-      $("#btn_recording").show();
+      $("#btn_record0").hide();
+      $("#btn_recording0").show();
+      $("#btn_record1").hide();
+      $("#btn_recording1").show();
     }
     else{
-      $("#btn_record").show();
-      $("#btn_recording").hide();
+      $("#btn_record0").show();
+      $("#btn_recording0").hide();
+      $("#btn_record1").show();
+      $("#btn_recording1").hide();
     }
   
   }, 500);
@@ -296,7 +291,7 @@
   //Record Grpah
   var is_recording = false;
   var record_start_position = 0;
-  $('#btn_record').on('click', function(e){
+  $('#btn_record0').on('click', function(e){
     is_recording = true;
     if(data.datasets[0].data != []){
       record_start_position = count - data.datasets[0].data.length;
@@ -305,7 +300,20 @@
       record_start_position = 0;
     }
   });
-  $('#btn_recording').on('click', function(e){
+  $('#btn_recording0').on('click', function(e){
+    stop_record();
+  });
+
+  $('#btn_record1').on('click', function(e){
+    is_recording = true;
+    if(data.datasets[0].data != []){
+      record_start_position = count - data.datasets[0].data.length;
+    }
+    else{
+      record_start_position = 0;
+    }
+  });
+  $('#btn_recording1').on('click', function(e){
     stop_record();
   });
 
