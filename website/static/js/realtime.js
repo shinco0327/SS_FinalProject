@@ -107,9 +107,9 @@
   
   
   var update_chart = function(e){
-    if($("#rawcollapse").hasClass("show")){
+    if($("#Graphcollapse").hasClass("show")){
       if(data != {}){
-        $.getJSON('/getrawdata',{start_oid: start_oid, count: count}
+        $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
         ,function(return_dict){ 
           console.log(return_dict.start_oid); 
           console.log(return_dict.count);   
@@ -184,16 +184,29 @@
   var count = 0;
   var past_timestamp = 0;
   var past_seconds = -1;
+  var GraphMode = '';
   //Raw page
   $("#btnRaw").click(function(){
+    GraphProcessing();
+    GraphMode = "RAW";
+  });
+
+  //DCF page
+  $("#btnDCF").click(function(){
+    GraphProcessing();
+    GraphMode = "DCF";
+  });
+ 
+
+  var GraphProcessing = function(e){
     if(is_recording){
       stop_record();
     }
-    if($("#rawcollapse").hasClass("collapse") && !$("#rawcollapse").hasClass("show") ){
+    if($("#Graphcollapse").hasClass("collapse") && !$("#Graphcollapse").hasClass("show") ){
       console.log("count: 0");
       count = 0;
       past_seconds = -1;
-      $.getJSON('/getrawdata',{start_oid: start_oid, count: count}
+      $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
       ,function(return_dict){ 
         //console.log(return_dict.start_oid); 
         //console.log(return_dict.count);   
@@ -215,9 +228,7 @@
           }else{
             label.push('');
           }
-        }
-        
-        
+        }    
         //data['datasets']['data'] = return_dict.value;
         data = {
           labels: label,
@@ -240,10 +251,7 @@
 
         });
       }
-  });
- 
-
-  
+  }
   
   
   $('#fftnamecontainer a').on('click', function(e){
@@ -285,7 +293,7 @@
  
   
   //---------------------------------------------------------
-  //Record raw
+  //Record Grpah
   var is_recording = false;
   var record_start_position = 0;
   $('#btn_record').on('click', function(e){
@@ -309,7 +317,7 @@
       alert("Canceled!");
     } else {
         //alert("start_oid: "+start_oid+"\n start_position: "+record_start_position+"\n endlength: "+count);
-      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, type_of_record:"RAW", name:record_name}
+      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, type_of_record:GraphMode, name:record_name}
       ,function(return_dict){ 
         if(return_dict.successful == true){
           alert("Saved!");

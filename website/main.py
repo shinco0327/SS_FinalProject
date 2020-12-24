@@ -133,15 +133,17 @@ def systemtime():
     return Response(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), mimetype='text')
 #-------------------------------------------------------------------------------
 #return  raw data 
-@app.route('/getrawdata', methods=['GET', 'POST'])
-def getrawdata():
+@app.route('/getgraphdata', methods=['GET', 'POST'])
+def getgraphdata():
     user,db = check_user()
     if(db ==None):
         return redirect(url_for('login')) 
     count = request.args.get("count", type=int)
-    if count == None:
+    graphmode = request.args.get('graphmode', type=str)
+    if count == None or graphmode == None or graphmode == '':
         return jsonify(start_oid=None, count=0, value=[], time=[])
     #print(count)
+    print(graphmode)
     if count == 0:  #Draw New Chart
         datalist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1.5))}}))
         print(datalist)
@@ -154,7 +156,12 @@ def getrawdata():
             if i.get('value', None) != None:
                 valuelist.append(i.get('value', None))
                 timelist.append(datetime.datetime.timestamp(i.get('time', None)))
-        return jsonify(start_oid=json_start_oid, count=len(valuelist), value=valuelist, time=timelist)
+        fix_valuelist = []
+        if(graphmode == "RAW"):
+            fix_valuelist = valuelist
+        elif(graphmode == "DCF"):
+            fix_valuelist = valuelist - np.mean(valuelist)
+        return jsonify(start_oid=json_start_oid, count=len(valuelist), value=fix_valuelist.tolist(), time=timelist)
     elif count > 0:   #Update chart
         str_start_oid = request.args.get('start_oid', type=str)
         str1_start_oid =  str_start_oid.replace("\"", "")
@@ -171,9 +178,12 @@ def getrawdata():
             if i.get('value', None) != None:
                 valuelist.append(i.get('value', None))
                 timelist.append(datetime.datetime.timestamp(i.get('time', None)))
-        
-        
-        return jsonify(start_oid=json_start_oid, count=len(valuelist)+count, value=valuelist, time=timelist)
+        fix_valuelist = []
+        if(graphmode == "RAW"):
+            fix_valuelist = valuelist
+        elif(graphmode == "DCF"):
+            fix_valuelist = valuelist - np.mean(valuelist)
+        return jsonify(start_oid=json_start_oid, count=len(valuelist)+count, value=fix_valuelist.tolist(), time=timelist)
 
     return jsonify(start_oid=None, count=0, value=[], time=[])
 #-------------------------------------------------------------------------------
@@ -265,7 +275,7 @@ def thread_calt_heart_rate(db):
     Recenttrend = 0
     readingsIndex = 0
     while 1:
-        firstlist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1.5))}}).limit(1))
+        firstlist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=2))}}).limit(1))
         last_oid = None
         if(firstlist == [] or firstlist[0].get('_id', None) == None):
             heartrate = {'heartrate': 0, 'mode': 'disconnect'}
@@ -296,7 +306,7 @@ def thread_calt_heart_rate(db):
                 readingsIndex = (readingsIndex + 1) % len(recentReading)
                 #print(Recenttrend)
             
-                if(Recenttrend >= 2 and datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime >= 0.150):
+                if(Recenttrend >= 1.95 and datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime >= 0.150):
                     #print(60/(time.time()-lastBeattime))
                     currenHearttrate = 60/(datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime)
                     HeartrateBuff.append(currenHearttrate)
