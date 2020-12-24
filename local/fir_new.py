@@ -45,7 +45,7 @@ ax3.set_ylim(0,1)
 # plot parameters
 print ('plotting data...')
 # open serial port
-strPort='com8'
+strPort='com4'
 ser = serial.Serial(strPort, 115200)
 ser.flush()
 
@@ -90,7 +90,7 @@ while True:
         t = np.arange(0, len(y_value)/fs, 1/fs) 
         for i in range(0,125):
             x = np.cos(2*np.pi*i*t)
-            y = signal.lfilter([1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11,1/11, 1/11], 1, x)
+            y = signal.lfilter([1/5,1/5,1/5,1/5,1/5], 1, x)
             z.append(max(y))   
 
         
