@@ -89,6 +89,12 @@
           count = return_dict.count;
           var timelist = return_dict.time;
           var label = [];    
+          if(count == 0){
+            past_seconds = -1;
+            GraphProcessing();
+            return false; 
+          }
+          
           for(var i=0; i<timelist.length; i++){
             if(past_seconds < 0){
               past_seconds = 0;
@@ -220,10 +226,10 @@
       options.scales.yAxes[0].ticks.max = 1000;
     }else if(GraphMode == "DCF"){
       options.scales.yAxes[0].ticks.min = -5;
-      options.scales.yAxes[0].ticks.max = 15;
+      options.scales.yAxes[0].ticks.max = 8;
     }else if(GraphMode.substring(0,3) == "LPF"){
       options.scales.yAxes[0].ticks.min = -5;
-      options.scales.yAxes[0].ticks.max = 15;
+      options.scales.yAxes[0].ticks.max = 8;
     }
     else{
       options.scales.yAxes[0].ticks.min = 0;
@@ -234,7 +240,9 @@
     }
     console.log("count: 0");
     count = 0;
-    past_seconds = -1;
+    if(count == 0){
+      past_seconds = -1;
+    }
     $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
     ,function(return_dict){ 
       //console.log(return_dict.start_oid); 

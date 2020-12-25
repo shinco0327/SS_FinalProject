@@ -19,8 +19,8 @@ def push_mongo():
                 break
             else:
                 pass
-
-strPort='com4'
+x = input("Please enter port")
+strPort='com' + str(x)
 ser = serial.Serial(strPort, 115200)
 ser.flush()
 
@@ -36,7 +36,7 @@ while 1:
         print(e)
         print("Can't sync time")
 
-conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/')
+conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/', username='sam',password='mongo23392399',authSource='admin',authMechanism='SCRAM-SHA-256')
 
 update_dict = []
 db = conn['admin']

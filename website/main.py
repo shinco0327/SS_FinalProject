@@ -14,8 +14,9 @@ from scipy import signal
 
 # 初始化 Flask 類別成為 instance
 app = Flask(__name__)
-conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/')
-
+#conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/')
+conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/', username='sam',password='mongo23392399',authSource='admin',authMechanism='SCRAM-SHA-256')
+print(conn)
 #-----------------------------------------------------------------------------------
 app.secret_key= b'%\xab\x9ei\xd6b\x8a\xab\xcd\xb1\xda\x87\x0e\xbd\xae\xb6_\xfd\x98\xf8v\xf2\x8dZ'
 login_manger=LoginManager()
@@ -319,7 +320,10 @@ def thread_calt_heart_rate(db):
 
 
         while 1:
-            datalist = list(db.real_time.find({"_id":{"$gt": last_oid}}).max_time_ms(300).limit(50))
+            try:
+                datalist = list(db.real_time.find({"_id":{"$gt": last_oid}}).max_time_ms(300).limit(50))
+            except:
+                break
             for data in datalist:
                 newRead = data.get('value', 0)
                 #print(newRead)
