@@ -147,7 +147,7 @@ def getgraphdata():
     #print(count)
     print(graphmode)
     if count == 0:  #Draw New Chart
-        datalist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1.5))}}))
+        datalist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1))}}))
         print(datalist)
         if datalist == []:
             return jsonify(start_oid=None, count=0, value=[], time=[])
@@ -167,7 +167,10 @@ def getgraphdata():
                 pass
             elif(graphmode[0:3] == "LPF"):
                 if(graphmode == "LPFButter"):
-                    pass
+                    fs = 1/(abs(timelist[0] - timelist[-1])/len(valuelist))
+                    print(timelist)
+                    sos = signal.butter(10, 10, 'lp', fs=fs, output='sos')
+                    fix_valuelist = signal.sosfilt(sos, fix_valuelist).tolist()
                 elif(graphmode[0:5] == "LPFpt"):
                     print("It's ", graphmode[5:])
                     filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
@@ -199,7 +202,9 @@ def getgraphdata():
                 fix_valuelist = fix_valuelist.tolist()
             elif(graphmode[0:3] == "LPF"):
                 if(graphmode == "LPFButter"):
-                    pass
+                    fs = 1/(abs(timelist[0] - timelist[-1])/len(valuelist))
+                    sos = signal.butter(10, 10, 'lp', fs=fs, output='sos')
+                    fix_valuelist = signal.sosfilt(sos, fix_valuelist).tolist()
                 elif(graphmode[0:5] == "LPFpt"):
                     print("It's ", graphmode[5:])
                     filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
