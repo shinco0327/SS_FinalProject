@@ -12,7 +12,7 @@
   //---------------------------------------------------------
   // Graphs
   var ctx0 = document.getElementById("myChart0");
-  var ctx1 = document.getElementById("myChart1");
+ ;
 
   var data = {};
   
@@ -26,6 +26,7 @@
           radius: 0
       }},
     scaleShowValues: true,  
+    maintainAspectRatio: true,
     scales: {
       xAxes: [{
         ticks: {
@@ -77,7 +78,7 @@
   
   
   var update_chart = function(e){
-    if($("#Graphcollapse0").hasClass("show") || $("#Graphcollapse1").hasClass("show")){
+    if($("#Waveform_container").is(':visible') && $("#Graphcollapse").hasClass('show')){
       if(data != {}){
         $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
         ,function(return_dict){ 
@@ -111,28 +112,31 @@
         //setData(data.datasets[0].data);
         //setData(data.datasets[1].data);
         //setLabels(data.labels);
-        if(GraphMode == 'RAW'){
-          var myLineChart = new Chart(ctx0 , {
-            type: "line",
-            data: data,
-            options: options 
-          });
-        }else if(GraphMode == 'DCF'){
-          var myLineChart = new Chart(ctx1 , {
-            type: "line",
-            data: data,
-            options: options 
-          });
-        }
+        
+        var myLineChart = new Chart(ctx0 , {
+          type: "line",
+          data: data,
+          options: options 
+        });
+     
+      }
+      else{
+        GraphProcessing();
       }
     }
   };
 
  //---------------------------------------------------------
-
   //FFT page
-  $("#btnFFT").click(function(){
-    if($("#choosefft").hasClass("collapse") && !$("#choosefft").hasClass("show") ){
+  $("#btnLPF").click(function(){
+    if($("#Graphcollapse").hasClass("show") && GraphMode.substring(0,3) == "LPF"){
+      $("#Graphcollapse").collapse('hide');
+    }else{
+      $("#Graphcollapse").collapse('show');
+      GraphMode = "LPF";
+      $("#Waveform_container").hide();
+      $("#Spectrum_container").hide();
+      $("#LPFoption").show();
       $.getJSON('/getfiltertype',{   
       },function(data){     
         //get all filter name   
@@ -148,12 +152,31 @@
         //ul.innerHTML = str1;
         console.log(listfilter);
         //open dropdown
-        if ($('.dropdown').find('.dropdown-menu').is(":hidden")){
-          $('.dropdown-toggle').dropdown('toggle');
-        }
+        //if ($('.dropdown').find('.dropdown-menu').is(":hidden")){
+        //  $('.dropdown-toggle').dropdown('toggle');
+        //}
       });
     }
   });
+
+  //LPF
+  $("#btnButter").click(function(){
+    $("#Waveform_container").show();
+    $("#Spectrum_container").show();
+    $("#LPFoption").hide();
+    GraphMode = "LPFButter";
+    GraphProcessing();
+  });
+  $('#fftnamecontainer a').on('click', function(e){
+    var selText = $(this).text();
+    GraphMode = "LPF" + 'pt' +selText.replace("-pt",'');
+    alert(GraphMode);
+    $("#Waveform_container").show();
+    $("#Spectrum_container").show();
+    $("#LPFoption").hide();
+    GraphProcessing();
+  });
+
 
   var start_oid;
   var count = 0;
@@ -162,14 +185,31 @@
   var GraphMode = '';
   //Raw page
   $("#btnRaw").click(function(){
-    GraphMode = "RAW";
-    GraphProcessing();
+    console.log(GraphMode);
+    if($("#Graphcollapse").hasClass("show") && GraphMode == "RAW"){
+      $("#Graphcollapse").collapse('hide');
+    }else{
+      $("#Graphcollapse").collapse('show');
+      $("#Waveform_container").show();
+      $("#Spectrum_container").show();
+      $("#LPFoption").hide();
+      GraphMode = "RAW";
+      GraphProcessing();
+    }
   });
 
   //DCF page
   $("#btnDCF").click(function(){
-    GraphMode = "DCF";
-    GraphProcessing();
+    if($("#Graphcollapse").hasClass("show") && GraphMode == "DCF"){
+      $("#Graphcollapse").collapse('hide');
+    }else{
+      $("#Graphcollapse").collapse('show');
+      $("#Waveform_container").show();
+      $("#Spectrum_container").show();
+      $("#LPFoption").hide();
+      GraphMode = "DCF";
+      GraphProcessing();
+    }
   });
  
 
@@ -181,81 +221,74 @@
     }else if(GraphMode == "DCF"){
       options.scales.yAxes[0].ticks.min = -5;
       options.scales.yAxes[0].ticks.max = 15;
+    }else if(GraphMode.substring(0,3) == "LPF"){
+      options.scales.yAxes[0].ticks.min = -5;
+      options.scales.yAxes[0].ticks.max = 15;
+    }
+    else{
+      options.scales.yAxes[0].ticks.min = 0;
+      options.scales.yAxes[0].ticks.max = 1000;
     }
     if(is_recording){
       stop_record();
     }
-    if($("#Graphcollapse1").hasClass("collapse") && !$("#Graphcollapse1").hasClass("show") ){
-      console.log("count: 0");
-      count = 0;
-      past_seconds = -1;
-      $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
-      ,function(return_dict){ 
-        //console.log(return_dict.start_oid); 
-        //console.log(return_dict.count);   
-        //console.log(return_dict.value);
-        start_oid = return_dict.start_oid;
-        count = return_dict.count;
-        var timelist = return_dict.time;
-        var label = [];    
-        for(var i=0; i<timelist.length; i++){
-          if(past_seconds < 0){
-            past_seconds = 0;
-            label.push(past_seconds);
-            past_timestamp = timelist[i];
-          }
-          if(timelist[i] - past_timestamp >= 1){
-            past_seconds += 1;
-            label.push(past_seconds);
-            past_timestamp = timelist[i];
-          }else{
-            label.push('');
-          }
-        }    
-        //data['datasets']['data'] = return_dict.value;
-        data = {
-          labels: label,
-          datasets: [{
-            
-            lineTension: 0,
-            backgroundColor: 'transparent',
-            borderColor: '#007bff',
-            borderWidth: 4,
-            pointBackgroundColor: '#007bff',  
-            data: return_dict.value
-          }]};
-        console.log(data)
-        if(GraphMode == "RAW"){
-          var myLineChart = new Chart(ctx0 , {
-            type: "line",
-            data: data,
-            options: options 
-          });
-        }else if(GraphMode == "DCF"){
-          var myLineChart = new Chart(ctx1 , {
-            type: "line",
-            data: data,
-            options: options 
-          });
+    console.log("count: 0");
+    count = 0;
+    past_seconds = -1;
+    $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
+    ,function(return_dict){ 
+      //console.log(return_dict.start_oid); 
+      //console.log(return_dict.count);   
+      //console.log(return_dict.value);
+      start_oid = return_dict.start_oid;
+      count = return_dict.count;
+      var timelist = return_dict.time;
+      var label = [];    
+      for(var i=0; i<timelist.length; i++){
+        if(past_seconds < 0){
+          past_seconds = 0;
+          label.push(past_seconds);
+          past_timestamp = timelist[i];
         }
-
-
-        });
-      }
+        if(timelist[i] - past_timestamp >= 1){
+          past_seconds += 1;
+          label.push(past_seconds);
+          past_timestamp = timelist[i];
+        }else{
+          label.push('');
+        }
+      }    
+      //data['datasets']['data'] = return_dict.value;
+      data = {
+        labels: label,
+        datasets: [{
+          
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: '#007bff',
+          borderWidth: 4,
+          pointBackgroundColor: '#007bff',  
+          data: return_dict.value
+        }]};
+      console.log(data);
+      
+      var myLineChart = new Chart(ctx0 , {
+        type: "line",
+        data: data,
+        options: options 
+      });        
+    });
+    
   }
   
   
-  $('#fftnamecontainer a').on('click', function(e){
-    var selText = $(this).text();
-    alert(selText);
-  });
+ 
 
   //auto refresh
   setInterval(function () {
     
 
     update_chart();
-
     interval_10 += 1;
     if(interval_10 >= 1){
       interval_10 = 0;
@@ -266,21 +299,18 @@
     
     interval_100 += 1;
     if(interval_100 >= 19){
+      //$("#Graphcollapse0").collapse("hide");
       interval_100 = 0;
       check_alive();
     }
-
+    
     if(is_recording == true){
       $("#btn_record0").hide();
       $("#btn_recording0").show();
-      $("#btn_record1").hide();
-      $("#btn_recording1").show();
     }
     else{
       $("#btn_record0").show();
       $("#btn_recording0").hide();
-      $("#btn_record1").show();
-      $("#btn_recording1").hide();
     }
   
   }, 500);
@@ -304,18 +334,7 @@
     stop_record();
   });
 
-  $('#btn_record1').on('click', function(e){
-    is_recording = true;
-    if(data.datasets[0].data != []){
-      record_start_position = count - data.datasets[0].data.length;
-    }
-    else{
-      record_start_position = 0;
-    }
-  });
-  $('#btn_recording1').on('click', function(e){
-    stop_record();
-  });
+
 
   var stop_record =function(e){
     is_recording = false;
@@ -379,6 +398,8 @@
     });
   };
   check_alive()
+
+  
 })()
 
 

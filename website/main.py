@@ -8,7 +8,9 @@ import threading
 from bson import ObjectId
 import numpy as np
 import collections
-
+#For signal processing
+from scipy import signal
+#End of signal processing
 
 # 初始化 Flask 類別成為 instance
 app = Flask(__name__)
@@ -115,7 +117,7 @@ def logout():
 #-------------------------------------------------------------------------------
 @app.route('/getfiltertype')
 def getfiltertype():
-    list1 = ['third', 'nine-pt', 'eleven']
+    list1 = ['3-pt', '9-pt', '11-pt', '15-pt']
     return jsonify(listfilter = list1)
 #-------------------------------------------------------------------------------
 #get tstamp
@@ -159,8 +161,18 @@ def getgraphdata():
         fix_valuelist = []
         if(graphmode == "RAW"):
             fix_valuelist = valuelist
-        elif(graphmode == "DCF"):
+        else:
             fix_valuelist = (valuelist - np.mean(valuelist)).tolist()
+            if(graphmode == "DCF"):
+                pass
+            elif(graphmode[0:3] == "LPF"):
+                if(graphmode == "LPFButter"):
+                    pass
+                elif(graphmode[0:5] == "LPFpt"):
+                    print("It's ", graphmode[5:])
+                    filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
+                    fix_valuelist = signal.lfilter(filt_list, 1, fix_valuelist).tolist()
+
         return jsonify(start_oid=json_start_oid, count=len(valuelist), value=fix_valuelist, time=timelist)
     elif count > 0:   #Update chart
         str_start_oid = request.args.get('start_oid', type=str)
@@ -181,8 +193,17 @@ def getgraphdata():
         fix_valuelist = []
         if(graphmode == "RAW"):
             fix_valuelist = valuelist
-        elif(graphmode == "DCF"):
-            fix_valuelist = (valuelist - np.mean(valuelist)).tolist()
+        else:
+            fix_valuelist = (valuelist - np.mean(valuelist))
+            if(graphmode == "DCF"):
+                fix_valuelist = fix_valuelist.tolist()
+            elif(graphmode[0:3] == "LPF"):
+                if(graphmode == "LPFButter"):
+                    pass
+                elif(graphmode[0:5] == "LPFpt"):
+                    print("It's ", graphmode[5:])
+                    filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
+                    fix_valuelist = signal.lfilter(filt_list, 1, fix_valuelist).tolist()
         return jsonify(start_oid=json_start_oid, count=len(valuelist)+count, value=fix_valuelist, time=timelist)
 
     return jsonify(start_oid=None, count=0, value=[], time=[])
