@@ -20,7 +20,7 @@ def push_mongo():
             else:
                 pass
 
-strPort='com8'
+strPort='com4'
 ser = serial.Serial(strPort, 115200)
 ser.flush()
 
