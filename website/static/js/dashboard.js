@@ -30,6 +30,10 @@
             $('#heartpresent').text('Internet Unstable');
             $('#heartbpm').hide();
           }
+          else if(data.heartrate.mode == 'standby'){
+            $('#heartpresent').text('Standby...');
+            $('#heartbpm').hide();
+          }
           else if(data.heartrate.mode == 'measuring'){
             $('#heartpresent').text('Measuring...');
             $('#heartbpm').hide();

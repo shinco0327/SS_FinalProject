@@ -131,7 +131,7 @@
           <div class="card" id="Spectrum_container" style = "border: none">
             <div class="card-header" id="headingSpectrum" style="background-color: transparent">
               <h5 class="mb-0">
-                <button class="btn btn-lg collapsed" data-toggle="collapse" data-target="#collapseSpectrum" aria-expanded="false" aria-controls="collapseSpectrum">
+                <button class="btn btn-lg collapsed" id="btnSpect" data-toggle="collapse" data-target="#collapseSpectrum" aria-expanded="false" aria-controls="collapseSpectrum">
                   <span class="feather" data-feather="arrow-down"></span>
                   Spectrum
                 </button>
@@ -139,12 +139,8 @@
             </div>
             <div id="collapseSpectrum" class="collapse" aria-labelledby="headingSpectrum">
               <div class="card-body h-100">
-                <div class="chart-container row" style="position: relative;   height:800px; width:400px; max-width: 800px; max-height:  400px;" >
-                  <canvas class="my-4 w-100 mb-2" id="myChart0"></canvas> 
-                  <button type="button" class="btn row mb-2 btn-lg" style="color: #dc3545;
-                  border-color: #dc3545;" id="btn_record0">Record</button>
-                  <button type="button" class="btn row mb-2 btn-lg" style="color: #fff;
-                  background-color: #dc3545; border-color: #dc3545;" id="btn_recording0">Recording</button>
+                <div class="chart-container mb-2" style="position: relative;  height:50vh; width:75vw; max-width: 800px; max-height: 50vh" >
+                  <canvas class="my-4 w-100" id="myChart1"></canvas>
                 </div>
               </div>
               </div>

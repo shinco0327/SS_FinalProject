@@ -12,16 +12,25 @@
   //---------------------------------------------------------
   // Graphs
   var ctx0 = document.getElementById("myChart0");
- ;
+  var ctx1 = document.getElementById("myChart1");
 
   var data = {};
   
   var options = { 
-    animation: false,
+    animation: {
+      duration: 0 // general animation time
+    },
     //Boolean - If we want to override with a hard coded scale
     
+    hover: {
+      animationDuration: 0 // duration of animations when hovering an item
+    },
+    responsiveAnimationDuration: 0, // animation duration after a resize
     
     elements: {
+      line: {
+        tension: 0 // disables bezier curves
+      },
       point:{
           radius: 0
       }},
@@ -38,6 +47,45 @@
           //beginAtZero: true,
           min: 0,
           max: 1000
+        }
+      }]
+    },
+    legend: {
+      display: false
+    }
+  };
+
+  var options_spect = { 
+    animation: {
+      duration: 0 // general animation time
+    },
+    //Boolean - If we want to override with a hard coded scale
+    
+    hover: {
+      animationDuration: 0 // duration of animations when hovering an item
+    },
+    responsiveAnimationDuration: 0, // animation duration after a resize
+    
+    elements: {
+      line: {
+        tension: 0 // disables bezier curves
+      },
+      point:{
+          radius: 0
+      }},
+    scaleShowValues: true,  
+    maintainAspectRatio: true,
+    scales: {
+      xAxes: [{
+        ticks: {
+          autoSkip: true
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          //beginAtZero: true,
+          min: 0,
+          max: 150
         }
       }]
     },
@@ -82,9 +130,9 @@
       if(data != {}){
         $.getJSON('/getgraphdata',{start_oid: start_oid, count: count, graphmode:GraphMode}
         ,function(return_dict){ 
-          console.log(return_dict.start_oid); 
-          console.log(return_dict.count);   
-          console.log(return_dict.value);
+          //console.log(return_dict.start_oid); 
+          //console.log(return_dict.count);   
+          //console.log(return_dict.value);
           start_oid = return_dict.start_oid;
           count = return_dict.count;
           var timelist = return_dict.time;
@@ -118,7 +166,6 @@
         //setData(data.datasets[0].data);
         //setData(data.datasets[1].data);
         //setLabels(data.labels);
-        
         var myLineChart = new Chart(ctx0 , {
           type: "line",
           data: data,
@@ -132,12 +179,70 @@
     }
   };
 
+  var update_spectrum = function(e){
+    if($("#collapseSpectrum").hasClass("show")){ 
+      $.getJSON('/getspectrum',{ graphmode:GraphMode
+      },function(return_dict){     
+        console.log(return_dict);
+
+        var data_spect = {
+          labels: return_dict.freq,
+          datasets: [{
+            
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff',  
+            data: return_dict.value
+          }]};
+        
+          var myLineChart1 = new Chart(ctx1 , {
+            type: "line",
+            data: data_spect,
+            options: options_spect 
+          });  
+          options_spect.scales.yAxes[0].ticks.max = Math.max.apply(this,  return_dict.value) + 5;    
+        
+      });
+    }
+  };
+  //--------------------------------------------------------
+  $("#btnSpect").click(function(e){
+    if(!$("#collapseSpectrum").hasClass("show")){ 
+      $.getJSON('/getspectrum',{ graphmode:GraphMode
+      },function(return_dict){     
+        console.log(return_dict);
+
+        var data_spect = {
+          labels: return_dict.freq,
+          datasets: [{
+            
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff',  
+            data: return_dict.value
+          }]};
+        
+          var myLineChart1 = new Chart(ctx1 , {
+            type: "line",
+            data: data_spect,
+            options: options_spect 
+          });  
+          options_spect.scales.yAxes[0].ticks.max = Math.max.apply(this,  return_dict.value) + 5;    
+        
+      });
+    }
+  });
  //---------------------------------------------------------
   //FFT page
   $("#btnLPF").click(function(){
-    if($("#Graphcollapse").hasClass("show") && GraphMode.substring(0,3) == "LPF"){
+    if($("#Graphcollapse").hasClass("show") && GraphMode.substring(0,3) == "LPF" && !$("#Waveform_container").is(':visible')){
       $("#Graphcollapse").collapse('hide');
-    }else{
+    }
+    else{
       $("#Graphcollapse").collapse('show');
       GraphMode = "LPF";
       $("#Waveform_container").hide();
@@ -156,7 +261,7 @@
           $('#'+'d'+locate).text(listfilter[i]);
         }
         //ul.innerHTML = str1;
-        console.log(listfilter);
+        //console.log(listfilter);
         //open dropdown
         //if ($('.dropdown').find('.dropdown-menu').is(":hidden")){
         //  $('.dropdown-toggle').dropdown('toggle');
@@ -176,7 +281,7 @@
   $('#fftnamecontainer a').on('click', function(e){
     var selText = $(this).text();
     GraphMode = "LPF" + 'pt' +selText.replace("-pt",'');
-    alert(GraphMode);
+    //alert(GraphMode);
     $("#Waveform_container").show();
     $("#Spectrum_container").show();
     $("#LPFoption").hide();
@@ -297,10 +402,12 @@
     
 
     update_chart();
+
     interval_10 += 1;
     if(interval_10 >= 1){
       interval_10 = 0;
-      sync_time();
+      update_spectrum();
+      //sync_time();
     }
     
     

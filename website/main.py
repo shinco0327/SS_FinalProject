@@ -118,7 +118,7 @@ def logout():
 #-------------------------------------------------------------------------------
 @app.route('/getfiltertype')
 def getfiltertype():
-    list1 = ['3-pt', '9-pt', '11-pt', '15-pt']
+    list1 = ['3-pt', '5-pt', '7-pt','9-pt', '11-pt', '15-pt']
     return jsonify(listfilter = list1)
 #-------------------------------------------------------------------------------
 #get tstamp
@@ -214,6 +214,49 @@ def getgraphdata():
 
     return jsonify(start_oid=None, count=0, value=[], time=[])
 #-------------------------------------------------------------------------------
+#return  raw data 
+@app.route('/getspectrum', methods=['GET', 'POST'])
+def getspectrum():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    graphmode = request.args.get('graphmode', type=str)
+    if graphmode == None or graphmode == '':
+        return jsonify(value=[], freq=[])
+    datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=5)}}).max_time_ms(500))
+    if datalist == []:
+        return jsonify(value=[], freq=[])
+    valuelist = []
+    freqlist = []
+    timelist = []
+    fftlist = []
+    for i in datalist:
+        valuelist.append(i.get('value', 0))
+        timelist.append(datetime.datetime.timestamp(i.get('time', None)))
+    fs = 1/(abs(timelist[-1] - timelist[0])/len(timelist))
+    freqlist = np.arange(0, fs, fs/len(timelist)).tolist()
+    if(len(freqlist) > len(valuelist)):
+        del freqlist[-1]
+    elif(len(valuelist) > len(freqlist)):
+        del valuelist
+    freqlist = [ '%.2f' % elem for elem in freqlist ]
+    if(graphmode == "RAW"):
+        fftlist = np.fft.fft(valuelist)
+    elif(graphmode == "DCF"):
+        fftlist = np.fft.fft(valuelist - np.mean(valuelist))
+    elif(graphmode[0:3] == "LPF"):
+        if(graphmode == "LPFButter"):
+            sos = signal.butter(10, 10, 'lp', fs=fs, output='sos')
+            fix_valuelist = signal.sosfilt(sos, valuelist - np.mean(valuelist))
+            fftlist = np.fft.fft(fix_valuelist)
+        elif(graphmode[0:5] == "LPFpt"):
+            filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
+            fix_valuelist = signal.lfilter(filt_list, 1, valuelist - np.mean(valuelist))
+            fftlist = np.fft.fft(fix_valuelist)
+    fftlist = abs(fftlist).tolist()
+    
+    return jsonify(value= fftlist[:int(len(fftlist)/2)], freq= freqlist[:int(len(freqlist)/2)])
+#-------------------------------------------------------------------------------
 @app.route('/savechartrecord')
 def savechartrecord():
     user,db = check_user()
@@ -293,7 +336,48 @@ heartrate = {'heartrate': 0, 'mode': 'unauth'}
 
 def thread_calt_heart_rate(db):
     global heartrate
-    recentReading = [0, 0, 0, 0, 0, 0, 0, 0]
+    recent_reading = collections.deque([0, 0, 0, 0 , 0], maxlen=5)
+    ava_rate =  collections.deque([0, 0, 0], maxlen=3)
+    while 1:
+        try:
+            datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=5)}}).max_time_ms(500))
+            #datalist = list(db.real_time.find({}).sort('_id', -1).limit(400))
+            if datalist == []:
+                heartrate = {'heartrate': 0, 'mode': 'disconnect'}
+                continue
+            valuelist = []
+            timelist = []
+            for i in datalist:
+                valuelist.append(i.get('value', 0))
+                timelist.append(datetime.datetime.timestamp(i.get('time', None)))
+            fs = 1/(abs(timelist[-1] - timelist[0])/len(timelist))
+            f = np.arange(0, fs, fs/len(timelist))
+            valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
+            value_fft = np.fft.fft(valuelist)
+            x_skip = 0
+            for i in f:
+                if(i < 0.92):
+                    x_skip += 1
+            value_fft = abs(value_fft)
+            rate = f[np.argmax( value_fft[x_skip: int(len(value_fft)/2)] )+x_skip]*60
+            ava_rate.append(rate)
+            rate = np.average(ava_rate)
+            recent_reading.append(rate)
+            if(rate > 800):
+                heartrate = {'heartrate': 0, 'mode': 'standby'}
+            else:
+                first_num = recent_reading[0]
+                for i in recent_reading:
+                    if abs(first_num - i) > 5:
+                        heartrate = {'heartrate': 0, 'mode': 'measuring'}
+                        break
+                else:
+                    heartrate = {'heartrate': "%.2f" % rate, 'mode': 'done'}
+            
+        except Exception as e:
+            print(e)
+            pass
+    """ recentReading = [0, 0, 0, 0, 0, 0, 0, 0]
     HeartrateBuff = collections.deque([0, 0, 0, 0, 0, 0, 0, 0], maxlen=8)
     ava_rate = collections.deque([0, 0, 0], maxlen=3)
     lastRead = 0
@@ -352,7 +436,8 @@ def thread_calt_heart_rate(db):
                 break
 
             if(datalist != []):
-                last_oid = datalist[-1].get("_id", None)
+                last_oid = datalist[-1].get("_id", None) """
+    
         
 #-------------------------------------------------------------------------------
 #Thread will detect device offline
