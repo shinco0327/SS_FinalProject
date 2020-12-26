@@ -45,38 +45,37 @@ ax3.set_ylim(0,1)
 # plot parameters
 print ('plotting data...')
 # open serial port
-strPort='com4'
+strPort='com3'
 ser = serial.Serial(strPort, 115200)
 ser.flush()
 
 start = time.time()
-fs=0
+
 while True:
     try:
         x_time = []
         y_value = []
-        for ii in range(20):
+        for ii in range(2):
 
             try:
                 data = float(ser.readline())
                 x_time.append(time.time() - start)
                 y_value.append(data)
-                
-                
+                    
             except:
                 pass
         
-        
-        y = signal.lfilter([1/5,1/5,1/5,1/5,1/5], 1, (y_value-np.mean(y_value)))
+        y = signal.lfilter([1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11,1/11, 1/11], 1, (y_value-np.mean(y_value)))
         PData.add(x_time, (y_value-np.mean(y_value)), y)
         f =np.arange(0, 125, 1)
-        if((x_time[len(x_time)-1]-x_time[0]) != 0):
-            fs = 1/((x_time[len(x_time)-1]-x_time[0])/len(x_time))
+        
+        fs = 1/((x_time[len(x_time)-1]-x_time[0])/len(x_time))
         z = [] 
-        t = np.arange(0, len(y_value)/fs, 1/fs) 
+        t = np.arange(0, len(y_value)/fs, 1/fs)
+
         for i in range(0,125):
             x = np.cos(2*np.pi*i*t)
-            y = signal.lfilter([1/5,1/5,1/5,1/5,1/5], 1, x)
+            y = signal.lfilter([1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11, 1/11,1/11, 1/11], 1, x)
             z.append(max(y))   
 
         #print(x)
@@ -96,6 +95,8 @@ while True:
 
         
         
-    except KeyboardInterrupt:
-        break
-        pass
+    except Exception as e:
+        if e == KeyboardInterrupt:
+            break
+        else:
+            pass
