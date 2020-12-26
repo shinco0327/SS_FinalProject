@@ -9,10 +9,10 @@ from scipy import signal
 conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/', username='sam',password='mongo23392399',authSource='admin',authMechanism='SCRAM-SHA-256')
 db = conn['admin']
 
-ava_rate =  collections.deque([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], maxlen=10)
+ava_rate =  collections.deque([0, 0, 0], maxlen=3)
 while 1:
     try:
-        datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=10)}}))
+        datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=8)}}))
         #datalist = list(db.real_time.find({}).sort('_id', -1).limit(1000))
         if datalist == []:
             continue
@@ -24,10 +24,10 @@ while 1:
         fs = 1/(abs(timelist[-1] - timelist[0])/len(timelist))
         f = np.arange(0, fs, fs/len(timelist))
         #valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
-        value_fft = np.fft.fft(valuelist)
+        value_fft = np.fft.fft(valuelist - np.mean(valuelist))
         x_skip = 0
         for i in f:
-            if(i < 0.7):
+            if(i < 0.92):
                 x_skip += 1
         value_fft = abs(value_fft)
         rate = f[np.argmax( value_fft[x_skip: int(len(value_fft)/2)] )+x_skip]*60

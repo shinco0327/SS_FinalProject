@@ -48,7 +48,7 @@ thread_push_mongo.start()
 while 1:
     try:
         data = float(ser.readline())
-        update_dict.append({'value':data ,'time':datetime.fromtimestamp(time.time()), 'count': x})
+        update_dict.append({'value':data ,'time':datetime.fromtimestamp(time.time())})
         print(data)
     except Exception as e:
         if e == KeyboardInterrupt:
