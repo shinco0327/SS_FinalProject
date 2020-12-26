@@ -9,9 +9,10 @@ def push_mongo():
     global update_dict
     while 1:
         try:
-            if update_dict != []:
-                db.real_time.insert_many(update_dict)
-                update_dict = []
+            dict1 = update_dict.copy()
+            update_dict = []
+            if dict1 != []:
+                db.real_time.insert_many(dict1)
             time.sleep(0.01)
             db.device.update_many({},{'$set':{'alive': True}})
         except Exception as e:
@@ -44,16 +45,16 @@ db = conn['admin']
 thread_push_mongo = threading.Thread(target=push_mongo)
 thread_push_mongo.daemon = True
 thread_push_mongo.start()
-
 while 1:
     try:
         data = float(ser.readline())
-        update_dict.append({'value':data ,'time':datetime.now()})
+        update_dict.append({'value':data ,'time':datetime.fromtimestamp(time.time()), 'count': x})
         print(data)
     except Exception as e:
         if e == KeyboardInterrupt:
             break
         else:
-             pass
+            print(e)
+            pass
 
 print('done')
