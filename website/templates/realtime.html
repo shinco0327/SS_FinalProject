@@ -54,11 +54,33 @@
 
     <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" >
-        <h1 class="h2">Realtime</h1>
-        <h4 class="mb-2 mb-md-0" id="currentTime">Loading</h4>
+        <div class="container-fluid">
+          <div class="row">
+            <h1 class="h2  col-xs-12 col-md-9">Realtime</h1>
+            <div class=" col-xs-12 col-md-3 border" id="Heartcol">
+              <div class="row">
+                <div class="col-md-4" >
+                  <h6 class="mb-2 font-weight-light">Heartrate</h6>
+                </div>
+                <div class="col-md-8">
+                  <h4 class="mb-2 " id="heartpresent">Standby...</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="card mt-0">
+          <div class="card-body" style="max-height:50vh;">
+            <h6 class="card-title font-weight-light">Heartrate</h6>
+            <h4 class="card-textfont-weight-bold" id='heartpresent'>--</h4>
+          </div>
+        </div> -->
       </div>
 
+
       
+
+
       <div class="container-fluid" >
         <div class="row mb-2">
           <div class="alert alert-danger container-fluid" id="showoffline" role="alert" style="display:none">
@@ -81,6 +103,7 @@
       
 
         <div class="collapse mb-2" id="Graphcollapse" >
+          <h4 class="mb-2 mb-md-0 font-weight-light" id="graphtype" >Type: </h4>
           <div class="col btn-toolbar mb-md-0 mt-2" id="LPFoption" class="hide">
             <div class="dropdown">
               <button type="button" class="btn btn-md btn-outline-primary mr-2 dropdown-toggle mb-2" id="btnfilt_pt" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -103,51 +126,51 @@
               Butterworth
             </button>
           </div> 
+          <div class="row">
+            <div class="card col-xs-12 col-md-6" id="Waveform_container" style = "border: none;">
+              <div class="card-header" id="headingWaveform" style="background-color: transparent">
+                <h5 class="mb-0">
+                  <button class="btn btn-lg" data-toggle="collapse" data-target="#collapseWaveform" aria-expanded="true" aria-controls="collapseWaveform">
+                    <span class="feather" data-feather="arrow-down"></span>
+                    Waveform
+                  </button>
+                </h5>
+              </div>
           
-          <div class="card" id="Waveform_container" style = "border: none;">
-            <div class="card-header" id="headingWaveform" style="background-color: transparent">
-              <h5 class="mb-0">
-                <button class="btn btn-lg" data-toggle="collapse" data-target="#collapseWaveform" aria-expanded="true" aria-controls="collapseWaveform">
-                  <span class="feather" data-feather="arrow-down"></span>
-                  Waveform
-                </button>
-              </h5>
-            </div>
-        
-            <div id="collapseWaveform" class="collapse show " aria-labelledby="headingWaveform" >
-              <div class="card-body" >
-                <!--chart  <canvas class="my-4 w-100" id="myChart" width="900" height="450"></canvas>-->
-                <div class="chart-container mb-2" style="position: relative;  height:50vh; width:75vw; max-width: 800px; max-height: 50vh" >
-                  <canvas class="my-4 w-100" id="myChart0"></canvas>
-                </div>
-                <button type="button" class="btn mb-2 btn-lg" style="color: #dc3545;
-                  border-color: #dc3545;" id="btn_record0">Record</button>
-                  <button type="button" class="btn mb-2 btn-lg" style="color: #fff;
-                  background-color: #dc3545; border-color: #dc3545;" id="btn_recording0">Recording</button> 
-              </div>
-            </div>
-          </div>
-  
-          <div class="card" id="Spectrum_container" style = "border: none">
-            <div class="card-header" id="headingSpectrum" style="background-color: transparent">
-              <h5 class="mb-0">
-                <button class="btn btn-lg collapsed" id="btnSpect" data-toggle="collapse" data-target="#collapseSpectrum" aria-expanded="false" aria-controls="collapseSpectrum">
-                  <span class="feather" data-feather="arrow-down"></span>
-                  Spectrum
-                </button>
-              </h5>
-            </div>
-            <div id="collapseSpectrum" class="collapse" aria-labelledby="headingSpectrum">
-              <div class="card-body h-100">
-                <div class="chart-container mb-2" style="position: relative;  height:50vh; width:75vw; max-width: 800px; max-height: 50vh" >
-                  <canvas class="my-4 w-100" id="myChart1"></canvas>
+              <div id="collapseWaveform" class="collapse show " aria-labelledby="headingWaveform" >
+                <div class="card-body" >
+                  <!--chart  <canvas class="my-4 w-100" id="myChart" width="900" height="450"></canvas>-->
+                  <div class="chart-container mb-2" style="position: relative; " >
+                    <canvas class="my-4 w-100" id="myChart0"></canvas>
+                  </div>
+                  <button type="button" class="btn mb-2 btn-lg" style="color: #dc3545;
+                    border-color: #dc3545;" id="btn_record0">Record</button>
+                    <button type="button" class="btn mb-2 btn-lg" style="color: #fff;
+                    background-color: #dc3545; border-color: #dc3545;" id="btn_recording0">Recording</button> 
                 </div>
               </div>
+            </div>
+    
+            <div class="card col-xs-12 col-md-6" id="Spectrum_container" style = "border: none">
+              <div class="card-header" id="headingSpectrum" style="background-color: transparent">
+                <h5 class="mb-0">
+                  <button class="btn btn-lg collapsed" id="btnSpect" data-toggle="collapse" data-target="#collapseSpectrum" aria-expanded="false" aria-controls="collapseSpectrum">
+                    <span class="feather" data-feather="arrow-down"></span>
+                    Spectrum
+                  </button>
+                </h5>
+              </div>
+              <div id="collapseSpectrum" class="collapse" aria-labelledby="headingSpectrum">
+                <div class="card-body h-100">
+                  <div class="chart-container mb-2" style="position: relative;" >
+                    <canvas class="my-4 w-100" id="myChart1"></canvas>
+                  </div>
+                </div>
               </div>
             </div>
           </div>  
         </diV>
-
+      
 
 
         <div class="collapse mb-2" id="Graphcollapse1" data-parent="#mygroup">
@@ -160,50 +183,7 @@
             background-color: #dc3545; border-color: #dc3545;" id="btn_recording1">Recording</button>
           </div>  
         </div>
-
-        <div class="collapse mt-2 mb-2" id="choosefft" data-parent="#mygroup">
-          <h4 class="mb-2 ">Choose filters</h4>
-
-          
-
-        <!-- Testing
         
-        <div class="card" style = "border: none">
-          <div class="card-header" id="headingWaveform" style="background-color: transparent">
-            <h5 class="mb-0">
-              <button class="btn btn-lg" data-toggle="collapse" data-target="#collapseWaveform" aria-expanded="true" aria-controls="collapseWaveform">
-                <span class="feather" data-feather="arrow-down"></span>
-                Waveform
-              </button>
-            </h5>
-          </div>
-      
-          <div id="collapseWaveform" class="collapse show" aria-labelledby="headingWaveform" >
-            <div class="card-body">
-              ORA
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style = "border: none">
-          <div class="card-header" id="headingSpectrum" style="background-color: transparent">
-            <h5 class="mb-0">
-              <button class="btn btn-lg collapsed" data-toggle="collapse" data-target="#collapseSpectrum" aria-expanded="false" aria-controls="collapseSpectrum">
-                <span class="feather" data-feather="arrow-down"></span>
-                Spectrum
-              </button>
-            </h5>
-          </div>
-          <div id="collapseSpectrum" class="collapse" aria-labelledby="headingSpectrum">
-            <div class="card-body">
-              MUDA! MUDA!
-            </div>
-          </div>
-        </div>
-        
-        
-        
-        <Testing-->
 
       </div>
     </main>

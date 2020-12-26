@@ -80,6 +80,6 @@
   //auto refresh
   setInterval(function () {
     check_alive_and_rate();
-    sync_time();
+    //sync_time();
   }, 500);
 })()

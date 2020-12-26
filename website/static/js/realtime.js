@@ -183,7 +183,7 @@
     if($("#collapseSpectrum").hasClass("show")){ 
       $.getJSON('/getspectrum',{ graphmode:GraphMode
       },function(return_dict){     
-        console.log(return_dict);
+        //console.log(return_dict);
 
         var data_spect = {
           labels: return_dict.freq,
@@ -212,7 +212,7 @@
     if(!$("#collapseSpectrum").hasClass("show")){ 
       $.getJSON('/getspectrum',{ graphmode:GraphMode
       },function(return_dict){     
-        console.log(return_dict);
+        //console.log(return_dict);
 
         var data_spect = {
           labels: return_dict.freq,
@@ -245,6 +245,7 @@
     else{
       $("#Graphcollapse").collapse('show');
       GraphMode = "LPF";
+      $("#graphtype").text("Type: FIR");
       $("#Waveform_container").hide();
       $("#Spectrum_container").hide();
       $("#LPFoption").show();
@@ -276,10 +277,12 @@
     $("#Spectrum_container").show();
     $("#LPFoption").hide();
     GraphMode = "LPFButter";
+    $("#graphtype").text("Type: FIR/Butterworth");
     GraphProcessing();
   });
   $('#fftnamecontainer a').on('click', function(e){
     var selText = $(this).text();
+    $("#graphtype").text("Type: FIR/"+selText);
     GraphMode = "LPF" + 'pt' +selText.replace("-pt",'');
     //alert(GraphMode);
     $("#Waveform_container").show();
@@ -300,6 +303,7 @@
     if($("#Graphcollapse").hasClass("show") && GraphMode == "RAW"){
       $("#Graphcollapse").collapse('hide');
     }else{
+      $("#graphtype").text("Type: RAW");
       $("#Graphcollapse").collapse('show');
       $("#Waveform_container").show();
       $("#Spectrum_container").show();
@@ -314,6 +318,7 @@
     if($("#Graphcollapse").hasClass("show") && GraphMode == "DCF"){
       $("#Graphcollapse").collapse('hide');
     }else{
+      $("#graphtype").text("Type: DC Filted");
       $("#Graphcollapse").collapse('show');
       $("#Waveform_container").show();
       $("#Spectrum_container").show();
@@ -505,15 +510,34 @@
       //console.log(data.alive);
       if(data.alive == false){ 
         $('#showoffline').show();
+        $("#Heartcol").hide();
         count = 0;
       }
       else{ 
         $('#showoffline').hide();
+        $("#Heartcol").show();
+        $.getJSON('/getheartrate',{   
+        },function(data){     
+          
+          if(data.heartrate.mode == 'disconnect'){
+            $('#heartpresent').text('Internet Unstable');
+          }
+          else if(data.heartrate.mode == 'standby'){
+            $('#heartpresent').text('Standby...');
+          }
+          else if(data.heartrate.mode == 'measuring'){
+            $('#heartpresent').text('Measuring...');
+          }
+          else if(data.heartrate.mode == 'done'){
+            $('#heartpresent').text(data.heartrate.heartrate +" bpm");
+          }
+        });
     }
     });
   };
   check_alive()
 
+  
   
 })()
 

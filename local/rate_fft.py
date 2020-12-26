@@ -35,16 +35,19 @@ while 1:
         ava_rate.append(rate)
         rate = np.average(ava_rate)
         recent_reading.append(rate)
+        print(rate)
         if(rate > 800):
-            print("Put finger on the sensor to start measuring!")
+            #print("Put finger on the sensor to start measuring!")
+            pass
         else:
             first_num = recent_reading[0]
             for i in recent_reading:
                 if abs(first_num - i) > 5:
-                    print("Measuring")
+                   #print("Measuring")
                     break
             else:
-                print(rate)
+                pass
+                #print(rate)
         
     except Exception as e:
         if e == KeyboardInterrupt:

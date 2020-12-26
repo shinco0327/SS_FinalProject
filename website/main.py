@@ -368,7 +368,7 @@ def thread_calt_heart_rate(db):
             else:
                 first_num = recent_reading[0]
                 for i in recent_reading:
-                    if abs(first_num - i) > 5:
+                    if abs(first_num - i) > 10:
                         heartrate = {'heartrate': 0, 'mode': 'measuring'}
                         break
                 else:
