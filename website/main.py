@@ -331,9 +331,34 @@ def getheartrate():
     return jsonify(heartrate=heartrate)
 
 #-------------------------------------------------------------------------------
+#get frequency response
+@app.route('/getfreqresponse')
+def getfreqresponse():
+    global glob_fs
+    graphmode = request.args.get('graphmode', type=str)
+    if(graphmode=='' or graphmode==None):
+        return jsonify(amp=[], freq=[])
+    amplist = []
+    freqlist = []
+    t = np.arange(0, 1, 1/glob_fs)
+
+    freqlist = np.arange(0, int(glob_fs/2),1)
+    for i in freqlist:
+        x = np.cos(2*np.pi*i*t)
+        if(graphmode[0:3] == "LPF"):
+            if(graphmode == "LPFButter"):
+                sos = signal.butter(10, 10, 'lp', fs=glob_fs, output='sos')
+                y = signal.sosfilt(sos, x)
+            elif(graphmode[0:5] == "LPFpt"):
+                filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
+                y = signal.lfilter(filt_list, 1, x)
+            amplist.append(max(y))
+    return jsonify(value=amplist, freq=freqlist.tolist())
+
+#-------------------------------------------------------------------------------
 #Thread will calculate heartrate
 heartrate = {'heartrate': 0, 'mode': 'unauth'}
-
+glob_fs = 125
 def thread_calt_heart_rate(db):
     global heartrate
     recent_reading = collections.deque([0, 0, 0, 0 , 0], maxlen=5)
@@ -351,6 +376,8 @@ def thread_calt_heart_rate(db):
                 valuelist.append(i.get('value', 0))
                 timelist.append(datetime.datetime.timestamp(i.get('time', None)))
             fs = 1/(abs(timelist[-1] - timelist[0])/len(timelist))
+            global glob_fs 
+            glob_fs = fs
             f = np.arange(0, fs, fs/len(timelist))
             valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
             value_fft = np.fft.fft(valuelist)

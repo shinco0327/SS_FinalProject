@@ -13,6 +13,7 @@
   // Graphs
   var ctx0 = document.getElementById("myChart0");
   var ctx1 = document.getElementById("myChart1");
+  var ctxFreq = document.getElementById("FreqChart");
 
   var data = {};
   
@@ -208,6 +209,75 @@
     }
   };
   //--------------------------------------------------------
+  $("#btnAbout").click(function(e){
+    if(GraphMode.substring(0,3) == "LPF"){
+      if(GraphMode == "LPFButter"){
+        $("#aboutModaltitle").text("About Butterworth Filter");
+        $("#plotz").hide();
+      }else if(GraphMode.substring(3,5)=="pt"){
+        $("#aboutModaltitle").text("About "+GraphMode.substring(5)+"-pt Average Filter");
+        $("#graphz").attr("src", "static/images/zplot"+GraphMode.substring(5)+"pt.png");
+        $("#plotz").show();
+      }
+    }
+    $.getJSON('/getfreqresponse',{ graphmode:GraphMode
+    },function(return_dict){     
+      console.log(return_dict);
+      var myLineChartFreq = new Chart(ctxFreq , {
+        type: "line",
+        data: {
+          labels: return_dict.freq,
+          datasets: [{ 
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff',  
+            data: return_dict.value
+          }]},
+        options: { 
+          animation: {
+            duration: 0 
+          },          
+          hover: {
+            animationDuration: 0 
+          },
+          responsiveAnimationDuration: 0, 
+          elements: {
+            line: {
+              tension: 0
+            },
+            point:{
+                radius: 0
+            }},
+          scaleShowValues: true,  
+          maintainAspectRatio: true,
+          scales: {
+            xAxes: [{
+              ticks: {
+                autoSkip: true,
+                maxTicksLimit: 5
+              }
+            }],
+            yAxes: [{
+              ticks: {
+                min: 0,
+                max: 1.5
+              }
+            }]
+          },
+          legend: {
+            display: false
+          }
+        }
+      });
+      
+      
+    });
+    $("#aboutModal").modal("show");
+  });
+
+
   $("#btnSpect").click(function(e){
     if(!$("#collapseSpectrum").hasClass("show")){ 
       $.getJSON('/getspectrum',{ graphmode:GraphMode
@@ -248,6 +318,7 @@
       $("#graphtype").text("Type: FIR");
       $("#Waveform_container").hide();
       $("#Spectrum_container").hide();
+      $("#btnAbout").hide();
       $("#LPFoption").show();
       $.getJSON('/getfiltertype',{   
       },function(data){     
@@ -276,6 +347,7 @@
     $("#Waveform_container").show();
     $("#Spectrum_container").show();
     $("#LPFoption").hide();
+    $("#btnAbout").show();
     GraphMode = "LPFButter";
     $("#graphtype").text("Type: FIR/Butterworth");
     GraphProcessing();
@@ -288,6 +360,7 @@
     $("#Waveform_container").show();
     $("#Spectrum_container").show();
     $("#LPFoption").hide();
+    $("#btnAbout").show();
     GraphProcessing();
   });
 
@@ -304,6 +377,7 @@
       $("#Graphcollapse").collapse('hide');
     }else{
       $("#graphtype").text("Type: RAW");
+      $("#btnAbout").hide();
       $("#Graphcollapse").collapse('show');
       $("#Waveform_container").show();
       $("#Spectrum_container").show();
@@ -322,6 +396,7 @@
       $("#Graphcollapse").collapse('show');
       $("#Waveform_container").show();
       $("#Spectrum_container").show();
+      $("#btnAbout").hide();
       $("#LPFoption").hide();
       GraphMode = "DCF";
       GraphProcessing();
