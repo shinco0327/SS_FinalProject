@@ -49,64 +49,99 @@
             <h1 class="h2">History</h1>
             <h4 class="mb-2 mb-md-0" id="currentTime">Loading</h4>
         </div>
-        <div class="mt-4 mb-2">
+
+        <div class="container hide" id="detailPage">
+          <button type="button" id="btn_backtable" class="btn btn-dark mr-2 mb-2" >Back</button>
+          <div class="card bg-light mb-3" style="max-width: 34em;">
+            <!-- <div class="card-header"></div> -->
+            <div class="card-body">
+              <h4 class="mr-4 mb-1 card-title" id="recrodname" >Record Name: </h4>
+              <h4 class="mr-4 mb-1 font-weight-light" id="subjectname" >Subject Name: None</h4>
+              <h4 class="mr-4 1 font-weight-light" id="time" >Time: </h4>
+              <h5 class="mr-4 mb-4   font-weight-light border" id="remarks" >Remarks: None</h5>
+            </div>
+          </div>
+          <div class="dropdown mb-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Graph Type
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#">RAW</a>
+              <a class="dropdown-item" href="#">DC Filted</a>
+              <h6 class="dropdown-header">FIR Point Average</h6>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </div>
+          <div class="chart-container mb-2 border" style="position: relative;" >
+            <canvas class="my-4" id="myChart"></canvas>
+          </div>
+          <div class="btn-toolbar">
+            <button type="button" id="btnplay" class="btn btn-primary mr-2 mb-2" >Play</button>
+            <button type="button" id="btnpause" class="btn btn-warning mr-2 mb-2 hide" >Pause</button>
+            <button type="button" id="btnrestart" class="btn btn-danger mr-2 mb-2 hide" >Restart</button>
+          </div>
+          
+        </div>
+
+
+        <div class="mt-4 mb-2" id="tablePage">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Type</th>
+                        <th scope="col">Record Name</th>
+                        <th scope="col">Subject Name</th>
                         <th scope="col">Time</th>
                     </tr>
                     </thead>
                     <tbody>
                         <tr class="hide" id="t0">
                             <th scope="row" id="t0num">0</th>
-                            <td id="t0name">NULL</td>
-                            <td id="t0type">NULL</td>
+                            <td id="t0recordname">NULL</td>
+                            <td id="t0subjectname">NULL</td>
                             <td id="t0time">NULL</td>
                         </tr>
                         <tr class="hide" id="t1">
                             <th scope="row" id="t1num">0</th>
-                            <td id="t1name">NULL</td>
-                            <td id="t1type">NULL</td>
+                            <td id="t1recordname">NULL</td>
+                            <td id="t1subjectname">NULL</td>
                             <td id="t1time">NULL</td>
                         </tr>
                         <tr class="hide" id="t2">
                             <th scope="row" id="t2num">0</th>
-                            <td id="t2name">NULL</td>
-                            <td id="t2type">NULL</td>
+                            <td id="t2recordname">NULL</td>
+                            <td id="t2subjectname">NULL</td>
                             <td id="t2time">NULL</td>
                         </tr>
                         <tr class="hide" id="t3">
                             <th scope="row" id="t3num">0</th>
-                            <td id="t3name">NULL</td>
-                            <td id="t3type">NULL</td>
+                            <td id="t3recordname">NULL</td>
+                            <td id="t3subjectname">NULL</td>
                             <td id="t3time">NULL</td>
                         </tr>
                         <tr class="hide" id="t4">
                             <th scope="row" id="t4num">0</th>
-                            <td id="t4name">NULL</td>
-                            <td id="t4type">NULL</td>
+                            <td id="t4recordname">NULL</td>
+                            <td id="t4subjectname">NULL</td>
                             <td id="t4time">NULL</td>
                         </tr>
                         <tr class="hide" id="t5">
                             <th scope="row" id="t5num">0</th>
-                            <td id="t5name">NULL</td>
-                            <td id="t5type">NULL</td>
+                            <td id="t5recordname">NULL</td>
+                            <td id="t5subjectname">NULL</td>
                             <td id="t5time">NULL</td>
                         </tr>
                         <tr class="hide" id="t6">
                             <th scope="row" id="t6num">0</th>
-                            <td id="t6name">NULL</td>
-                            <td id="t6type">NULL</td>
+                            <td id="t6recordname">NULL</td>
+                            <td id="t6subjectname">NULL</td>
                             <td id="t6time">NULL</td>
                         </tr>
                         <tr class="hide" id="t7">
                             <th scope="row" id="t7num">0</th>
-                            <td id="t7name">NULL</td>
-                            <td id="t7type">NULL</td>
+                            <td id="t7recordname">NULL</td>
+                            <td id="t7subjectname">NULL</td>
                             <td id="t7time">NULL</td>
                         </tr>
                     </tbody>

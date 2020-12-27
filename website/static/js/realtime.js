@@ -528,6 +528,9 @@
     is_recording = true;
     if(data.datasets[0].data != []){
       record_start_position = count - data.datasets[0].data.length;
+      if(record_start_position < 0){
+        record_start_position = 0;
+      }
     }
     else{
       record_start_position = 0;
@@ -538,13 +541,12 @@
   });
 
 
-
+  var reference_end;
   var stop_record =function(e){
     is_recording = false;
+    reference_end = count;
     $("#SaveModal").modal('show');
     $("#record_name").val("record"+Date.now());
-    count = 0;
-    past_seconds = -1;
     /* var record_name = prompt("Please enter name of this record", "record"+Date.now());
 
     if (record_name == null || record_name == "") {
@@ -568,7 +570,7 @@
       $("#record_name").css("background-color", "#EF9A9A");
     }else{
       //alert($("#record_name").val()+'\n'+ $("#subject_name").val()+'\n'+$("#remarks").val());
-      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, record_name:$("#record_name").val(),
+      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: reference_end, record_name:$("#record_name").val(),
        subject_name:$("#subject_name").val(), remarks:$("#remarks").val()}
       ,function(return_dict){ 
         if(return_dict.successful == true){

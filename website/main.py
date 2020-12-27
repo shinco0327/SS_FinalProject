@@ -256,6 +256,40 @@ def getspectrum():
     fftlist = abs(fftlist).tolist()
     
     return jsonify(value= fftlist[:int(len(fftlist)/2)], freq= freqlist[:int(len(freqlist)/2)])
+    #-------------------------------------------------------------------------------
+#return  raw data 
+@app.route('/gethistorygraph', methods=['GET', 'POST'])
+def gethistorygraph():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    count = request.args.get("count", type=int)
+    str_record_oid = request.args.get('record_oid', type=str)
+    str1_record_oid =  str_record_oid.replace("\"", "")
+    record_oid = ObjectId(str1_record_oid)
+    json_record_oid = JSONEncoder().encode(record_oid)
+    graphmode = request.args.get('graphmode', type=str)
+    interval = request.args.get('interval', 0.5,type=float)
+    if count == None or graphmode == None:
+        return jsonify(record_oid=None, count=0, value=[], time=[])
+    #print(count)
+    #print(graphmode)
+    first_elem = list(db.history_realtime.find({'record_oid': record_oid}).skip(count).sort('_id', 1).limit(1))
+    if(first_elem ==  []):
+        return jsonify(count=count, value=[], time=[])
+    start_time = first_elem[0]['time']
+    datalist = list(db.history_realtime.find({'time':{'$gte': start_time,'$lt': start_time+datetime.timedelta(seconds=interval)}}))
+    if(datalist == []):
+        return jsonify(count=count, value=[], time=[])
+    valuelist = []
+    timelist = []
+    for i in datalist:
+        if i.get('value', None) != None:
+            valuelist.append(i.get('value', None))
+            timelist.append(datetime.datetime.timestamp(i.get('time', None)))
+    print(valuelist)
+    print(timelist)
+    return jsonify(count=count+len(valuelist), value=valuelist, time=timelist)
 #-------------------------------------------------------------------------------
 @app.route('/savechartrecord')
 def savechartrecord():
@@ -274,9 +308,9 @@ def savechartrecord():
             return jsonify(successful=False)
         datalist = list(db.real_time.find({"_id":{"$gte": reference_oid}}).skip(start_position).limit(reference_end+1-start_position))
         #print(datalist)
+        _id = db.history_overview.insert_one({'record_name': record_name, 'subject_name':subject_name, 'remarks': remarks,'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
         for i in datalist:
-            i['record_name'] = record_name
-        db.history_overview.insert_one({'record_name': record_name, 'subject_name':subject_name, 'remarks': remarks,'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
+            i['record_oid'] = _id.inserted_id
         db.history_realtime.insert_many(datalist)
         return jsonify(successful=True)
     except Exception as e:
@@ -291,7 +325,8 @@ def gethistorylist():
         return redirect(url_for('login')) 
     historylist = list(db.history_overview.find({}))
     for i in historylist:
-        i.pop('_id', None)
+        i['_id'] = JSONEncoder().encode(i.get('_id', None))
+        i['time'] = i.get('time', datetime.datetime.now()).strftime("%Y/%m/%d, %H:%M:%S")
     return jsonify(historylist=historylist)
 #-------------------------------------------------------------------------------   
 @app.route('/dashboard')
