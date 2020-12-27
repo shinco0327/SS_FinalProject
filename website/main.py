@@ -267,16 +267,20 @@ def savechartrecord():
         reference_oid = ObjectId(str_reference_oid.replace("\"", ""))
         reference_end = request.args.get("reference_end", type=int)
         start_position = request.args.get('start_position', type=int)
-        type_of_record = request.args.get('type_of_record', type=str)
-        name = request.args.get('name', type=str)
+        record_name = request.args.get('record_name', type=str)
+        subject_name = request.args.get('subject_name', type=str)
+        remarks = request.args.get('remarks', type=str)
+        if(record_name == '' or record_name == None):
+            return jsonify(successful=False)
         datalist = list(db.real_time.find({"_id":{"$gte": reference_oid}}).skip(start_position).limit(reference_end+1-start_position))
         #print(datalist)
         for i in datalist:
-            i['name_of_record'] = name
-        db.history_overview.insert_one({'name': name, 'type_of_record':type_of_record, 'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
+            i['record_name'] = record_name
+        db.history_overview.insert_one({'record_name': record_name, 'subject_name':subject_name, 'remarks': remarks,'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
         db.history_realtime.insert_many(datalist)
         return jsonify(successful=True)
-    except:
+    except Exception as e:
+        print('savehistory error: ',e)
         return jsonify(successful=False)
 #-------------------------------------------------------------------------------   
 #Get list of history record

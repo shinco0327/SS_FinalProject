@@ -257,12 +257,20 @@
               ticks: {
                 autoSkip: true,
                 maxTicksLimit: 5
+              },
+              scaleLabel: {
+                display: true,
+                labelString: 'Frequency (Hz)'
               }
             }],
             yAxes: [{
               ticks: {
                 min: 0,
                 max: 1.5
+              },
+              scaleLabel: {
+                display: true,
+                labelString: 'Amplitude'
               }
             }]
           },
@@ -533,7 +541,11 @@
 
   var stop_record =function(e){
     is_recording = false;
-    var record_name = prompt("Please enter name of this record", "record"+Date.now());
+    $("#SaveModal").modal('show');
+    $("#record_name").val("record"+Date.now());
+    count = 0;
+    past_seconds = -1;
+    /* var record_name = prompt("Please enter name of this record", "record"+Date.now());
 
     if (record_name == null || record_name == "") {
       alert("Canceled!");
@@ -548,8 +560,31 @@
         }
         count = 0;
       });
-    }  
+    }   */
   };
+  $("#SaveModalsubmit").on('click', function(e){
+    if($("#record_name").val() == '' || $("#record_name").val()== null){
+      alert("Please enter record name");
+      $("#record_name").css("background-color", "#EF9A9A");
+    }else{
+      //alert($("#record_name").val()+'\n'+ $("#subject_name").val()+'\n'+$("#remarks").val());
+      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, record_name:$("#record_name").val(),
+       subject_name:$("#subject_name").val(), remarks:$("#remarks").val()}
+      ,function(return_dict){ 
+        if(return_dict.successful == true){
+          $("#SaveModal").modal('hide');
+          $("#record_name").css("background-color", "#FFFFFF");
+          alert("Saved!");
+          count = 0;
+          past_seconds = -1;
+        }else{
+          alert("Error!");
+        }
+      });
+      
+    }
+    });
+
   //---------------------------------------------------------
  
   //Change_current_time
