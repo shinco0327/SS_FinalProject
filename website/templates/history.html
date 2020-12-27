@@ -50,7 +50,7 @@
             <h4 class="mb-2 mb-md-0" id="currentTime">Loading</h4>
         </div>
 
-        <div class="container hide" id="detailPage">
+        <div class="container float-left hide" id="detailPage">
           <button type="button" id="btn_backtable" class="btn btn-dark mr-2 mb-2" >Back</button>
           <div class="card bg-light mb-3" style="max-width: 34em;">
             <!-- <div class="card-header"></div> -->
@@ -62,15 +62,22 @@
             </div>
           </div>
           <div class="dropdown mb-2">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Graph Type
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="btntypegraph" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Graph Type: RAW
             </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">RAW</a>
-              <a class="dropdown-item" href="#">DC Filted</a>
+            <ul class="dropdown-menu" id="typeofgraph" aria-labelledby="btntypegraph">
+              <li><a class="dropdown-item" href="#">RAW</a></li>
+              <li><a class="dropdown-item" href="#">DC Filted</a></li>
               <h6 class="dropdown-header">FIR Point Average</h6>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
+              <li><a class="dropdown-item" href="#">3-pt</a></li> 
+              <li><a class="dropdown-item" href="#">5-pt</a></li> 
+              <li><a class="dropdown-item" href="#">7-pt</a></li>
+              <li><a class="dropdown-item" href="#">9-pt</a></li>
+              <li><a class="dropdown-item" href="#">11-pt</a></li>
+              <li><a class="dropdown-item" href="#">15-pt</a></li>
+              <h6 class="dropdown-header">Butterworth</h6>
+              <li><a class="dropdown-item" href="#">Butterworth</a><li>
+            </ul>
           </div>
           <div class="chart-container mb-2 border" style="position: relative;" >
             <canvas class="my-4" id="myChart"></canvas>

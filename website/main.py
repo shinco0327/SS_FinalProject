@@ -287,9 +287,22 @@ def gethistorygraph():
         if i.get('value', None) != None:
             valuelist.append(i.get('value', None))
             timelist.append(datetime.datetime.timestamp(i.get('time', None)))
-    print(valuelist)
-    print(timelist)
-    return jsonify(count=count+len(valuelist), value=valuelist, time=timelist)
+    fix_valuelist = []
+    if(graphmode == "RAW"):
+        fix_valuelist = valuelist
+    else:
+        fix_valuelist = (valuelist - np.mean(valuelist))
+        if(graphmode == "DCF"):
+            fix_valuelist = fix_valuelist.tolist()
+        elif(graphmode[0:3] == "LPF"):
+            if(graphmode == "LPFButter"):
+                fs = 1/(abs(timelist[0] - timelist[-1])/len(valuelist))
+                sos = signal.butter(10, 10, 'lp', fs=fs, output='sos')
+                fix_valuelist = signal.sosfilt(sos, fix_valuelist).tolist()
+            elif(graphmode[0:5] == "LPFpt"):
+                filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
+                fix_valuelist = signal.lfilter(filt_list, 1, fix_valuelist).tolist()
+    return jsonify(count=count+len(valuelist), value=fix_valuelist, time=timelist)
 #-------------------------------------------------------------------------------
 @app.route('/savechartrecord')
 def savechartrecord():

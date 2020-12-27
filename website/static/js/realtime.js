@@ -323,7 +323,7 @@
     else{
       $("#Graphcollapse").collapse('show');
       GraphMode = "LPF";
-      $("#graphtype").text("Type: FIR");
+      $("#graphtype").text("Type: Low Pass Filter");
       $("#Waveform_container").hide();
       $("#Spectrum_container").hide();
       $("#btnAbout").hide();
@@ -357,12 +357,12 @@
     $("#LPFoption").hide();
     $("#btnAbout").show();
     GraphMode = "LPFButter";
-    $("#graphtype").text("Type: FIR/Butterworth");
+    $("#graphtype").text("Type: Low Pass Filter/Butterworth");
     GraphProcessing();
   });
   $('#fftnamecontainer a').on('click', function(e){
     var selText = $(this).text();
-    $("#graphtype").text("Type: FIR/"+selText);
+    $("#graphtype").text("Type: Low Pass Filter/"+selText);
     GraphMode = "LPF" + 'pt' +selText.replace("-pt",'');
     //alert(GraphMode);
     $("#Waveform_container").show();

@@ -107,6 +107,38 @@
             this.btnrestrt.show();
             this.play_state = 1;
         }
+        change_GraphMode(GraphMode){
+            this.count = 0;
+            this.past_seconds = -1;
+            this.GraphMode = GraphMode;
+            this.past_timestamp = 0;
+            if(this.play_state == 1){
+                this.btnplay.hide();
+                this.btnpause.show();
+                this.btnrestrt.show();
+                this.play_state = 1;
+            }else{
+                this.btnplay.show();
+                this.btnpause.hide();
+                this.btnrestrt.hide();
+                this.play_state = 0;
+            }
+            if(GraphMode == "RAW"){
+                this.options.scales.yAxes[0].ticks.min = 0;
+                this.options.scales.yAxes[0].ticks.max = 1000;
+              }else if(GraphMode == "DCF"){
+                this.options.scales.yAxes[0].ticks.min = -5;
+                this.options.scales.yAxes[0].ticks.max = 10;
+              }else if(GraphMode.substring(0,3) == "LPF"){
+                this.options.scales.yAxes[0].ticks.min = -2;
+                this.options.scales.yAxes[0].ticks.max = 5;
+              }
+              else{
+                this.options.scales.yAxes[0].ticks.min = 0;
+                this.options.scales.yAxes[0].ticks.max = 1000;
+              }
+    
+        }
         can_update(){
             if(this.record_oid != "" && (this.count < this.total_length) && this.play_state == 1){
                 return true;
@@ -121,6 +153,9 @@
             var timelist = return_dict.time;
             this.count = return_dict.count;
             var label = []
+            if(this.play_state == 0){
+                return false;
+            }
             for(var i=0; i<timelist.length; i++){
                 if(this.past_seconds < 0){
                     this.past_seconds = 0;
@@ -236,6 +271,28 @@
             is_playing.new_chart(return_dict);
         });
     });
+
+    $('#typeofgraph a').on('click', function(e){
+        var selText = $(this).text();
+        var last3 = selText.slice(-3);
+        if(last3 == '-pt'){
+            $("#btntypegraph").text("Graph Type: FIR/"+ selText);
+            is_playing.change_GraphMode("LPFpt"+selText.substring(0, selText.length - 3));
+        }else if(selText == "Butterworth"){
+            is_playing.change_GraphMode("LPFButter");
+            $("#btntypegraph").text("Graph Type: "+ selText);
+        }else if(selText == "DC Filted"){
+            is_playing.change_GraphMode("DCF");
+            $("#btntypegraph").text("Graph Type: "+ selText);
+        }else{
+            is_playing.change_GraphMode("RAW");
+            $("#btntypegraph").text("Graph Type: "+ selText);
+        }
+        $.getJSON('/gethistorygraph', is_playing.gettoJson()
+            ,function(return_dict){ 
+                is_playing.new_chart(return_dict);
+        });
+      });
   
    
     var historylist = [];
@@ -312,6 +369,7 @@
             listpointer = parseInt(i)+parseInt(pointer_save); 
         }
     });
+    
 
     //Change_current_time
     var sync_time=function(e){ //
