@@ -70,7 +70,18 @@
         }
         new_record(record_oid, total_length){
             this.count = 0;
-            this.data = {}
+            this.data = {
+                labels: [],
+                datasets: [{
+                    
+                lineTension: 0,
+                backgroundColor: 'transparent',
+                borderColor: '#007bff',
+                borderWidth: 4,
+                pointBackgroundColor: '#007bff',  
+                data: []
+                }]
+            };
             this.past_seconds = -1;
             this.past_timestamp = 0;
             this.record_oid = record_oid;
