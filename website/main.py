@@ -335,11 +335,16 @@ def savechartrecord():
         record_name = request.args.get('record_name', type=str)
         subject_name = request.args.get('subject_name', type=str)
         remarks = request.args.get('remarks', type=str)
+        heartrate = request.args.get("heartrate", 0,type=float)
         if(record_name == '' or record_name == None):
             return jsonify(successful=False)
         datalist = list(db.real_time.find({"_id":{"$gte": reference_oid}}).skip(start_position).limit(reference_end+1-start_position))
         #print(datalist)
-        _id = db.history_overview.insert_one({'record_name': record_name, 'subject_name':subject_name, 'remarks': remarks,'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
+        if(heartrate > 50):
+            _id = db.history_overview.insert_one({'record_name': record_name, 'subject_name':subject_name, 'remarks': remarks,'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now()),
+            'heartrate':heartrate})
+        else:
+            _id = db.history_overview.insert_one({'record_name': record_name, 'subject_name':subject_name, 'remarks': remarks,'count': len(datalist), 'time': datalist[0].get('time', datetime.datetime.now())})
         for i in datalist:
             i['record_oid'] = _id.inserted_id
         db.history_realtime.insert_many(datalist)

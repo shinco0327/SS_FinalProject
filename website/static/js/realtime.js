@@ -512,8 +512,12 @@
   //Record Grpah
   var is_recording = false;
   var record_start_position = 0;
+  var heartrate_store = [];
+  var heartrate_stable = 0;
   $('#btn_record0').on('click', function(e){
     is_recording = true;
+    heartrate_store = [];
+    heartrate_stable = 0;
     if(data.datasets[0].data != []){
       record_start_position = count - data.datasets[0].data.length;
       if(record_start_position < 0){
@@ -531,28 +535,13 @@
 
   var reference_end;
   var stop_record =function(e){
+    $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
     is_recording = false;
     reference_end = count;
     $("#record_name").val("");
     $("#remarks").val("");
     $("#SaveModal").modal('show');
     $("#record_name").val("record"+Date.now());
-    /* var record_name = prompt("Please enter name of this record", "record"+Date.now());
-
-    if (record_name == null || record_name == "") {
-      alert("Canceled!");
-    } else {
-        //alert("start_oid: "+start_oid+"\n start_position: "+record_start_position+"\n endlength: "+count);
-      $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: count, type_of_record:GraphMode, name:record_name}
-      ,function(return_dict){ 
-        if(return_dict.successful == true){
-          alert("Saved!");
-        }else{
-          alert("Error!");
-        }
-        count = 0;
-      });
-    }   */
   };
   $("#SaveModalsubmit").on('click', function(e){
     if($("#record_name").val() == '' || $("#record_name").val()== null){
@@ -561,7 +550,7 @@
     }else{
       //alert($("#record_name").val()+'\n'+ $("#subject_name").val()+'\n'+$("#remarks").val());
       $.getJSON('/savechartrecord',{reference_oid: start_oid, start_position: record_start_position, reference_end: reference_end, record_name:$("#record_name").val(),
-       subject_name:$("#subject_name").val(), remarks:$("#remarks").val()}
+       subject_name:$("#subject_name").val(), remarks:$("#remarks").val(), heartrate:heartrate_stable}
       ,function(return_dict){ 
         if(return_dict.successful == true){
           $("#SaveModal").modal('hide');
@@ -626,12 +615,33 @@
           }
           else if(data.heartrate.mode == 'standby'){
             $('#heartpresent').text('Standby...');
+            $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
           }
           else if(data.heartrate.mode == 'measuring'){
             $('#heartpresent').text('Measuring...');
+            $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
           }
           else if(data.heartrate.mode == 'done'){
             $('#heartpresent').text(data.heartrate.heartrate +" bpm");
+            if(is_recording){
+              heartrate_store.push(data.heartrate.heartrate);
+              if(heartrate_store.length > 50){
+                heartrate_store.splice(0, 1);
+                var temporary = data.heartrate;
+                var total = 0;
+                for(var i in heartrate_store){
+                  total += parseInt(heartrate_store[i]);
+                  if(Math.abs(temporary - heartrate_store[i]) >= 5){
+                    break;
+                  }
+                  if(i == heartrate_store.length - 1){
+                    heartrate_stable = total/i;
+                    //$("#Heartcol").addClass("border-success");
+                    $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
+                  }
+                }
+              }
+            }
           }
         });
     }
