@@ -619,29 +619,32 @@
           }
           else if(data.heartrate.mode == 'measuring'){
             $('#heartpresent').text('Measuring...');
+            heartrate_store = [];
             $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
           }
           else if(data.heartrate.mode == 'done'){
             $('#heartpresent').text(data.heartrate.heartrate +" bpm");
-            if(is_recording){
-              heartrate_store.push(data.heartrate.heartrate);
-              if(heartrate_store.length > 50){
-                heartrate_store.splice(0, 1);
-                var temporary = data.heartrate;
-                var total = 0;
-                for(var i in heartrate_store){
-                  total += parseInt(heartrate_store[i]);
-                  if(Math.abs(temporary - heartrate_store[i]) >= 5){
-                    break;
-                  }
-                  if(i == heartrate_store.length - 1){
+            
+            heartrate_store.push(data.heartrate.heartrate);
+            if(heartrate_store.length > 50){
+              heartrate_store.splice(0, 1);
+              var temporary = data.heartrate;
+              var total = 0;
+              for(var i in heartrate_store){
+                total += parseInt(heartrate_store[i]);
+                if(Math.abs(temporary - heartrate_store[i]) >= 5){
+                  break;
+                }
+                if(i == heartrate_store.length - 1){
+                  if(is_recording){
                     heartrate_stable = total/i;
-                    //$("#Heartcol").addClass("border-success");
-                    $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
                   }
+                  //$("#Heartcol").addClass("border-success");
+                  $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
                 }
               }
-            }
+              }
+            
           }
         });
     }
