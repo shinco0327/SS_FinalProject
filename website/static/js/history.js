@@ -11,7 +11,13 @@
         $("#recrodname").text("Record Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].record_name); 
         $("#subjectname").text("Subject Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].subject_name); 
         $("#time").text("Time: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].time); 
-        $("#remarks").text("Remarks: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].remarks); 
+        if(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].remarks != ""){
+            $("#remarks").show();
+            $("#remarks").text("Remarks: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].remarks);}
+        else{
+            $("#remarks").hide();
+        }
+        is_playing.reset_graph(); 
         is_playing.new_record(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7]._id,
         historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].count);
         //alert($(this).attr('id'));
@@ -113,10 +119,30 @@
             this.count = 0;
             this.past_seconds = -1;
             this.past_timestamp = 0;
-            this.btnplay.hide();
-            this.btnpause.show();
+            this.btnplay.show();
+            this.btnpause.hide();
             this.btnrestrt.show();
-            this.play_state = 1;
+            this.play_state = 0;
+        }
+        reset_graph(){
+            this.data = {
+                labels: [],
+                datasets: [{
+                    
+                lineTension: 0,
+                backgroundColor: 'transparent',
+                borderColor: '#007bff',
+                borderWidth: 4,
+                pointBackgroundColor: '#007bff',  
+                data: []
+                }]
+            };
+            
+            var myLineChart = new Chart(this.ctx , {
+                type: "line",
+                data: this.data,
+                options: this.options 
+            });
         }
         change_GraphMode(GraphMode){
             this.count = 0;
@@ -277,12 +303,14 @@
     });
     $("#btnrestart").on('click', function(e){
         is_playing.restart();
-        $.getJSON('/gethistorygraph', is_playing.gettoJson()
-        ,function(return_dict){ 
-            is_playing.new_chart(return_dict);
-        });
+        is_playing.reset_graph();
+        //$.getJSON('/gethistorygraph', is_playing.gettoJson()
+        //,function(return_dict){ 
+        //    is_playing.new_chart(return_dict);
+        //});
     });
 
+    //Choose to show
     $('#typeofgraph a').on('click', function(e){
         var selText = $(this).text();
         var last3 = selText.slice(-3);
@@ -301,8 +329,28 @@
         }
         $.getJSON('/gethistorygraph', is_playing.gettoJson()
             ,function(return_dict){ 
+                is_playing.reset_graph();
                 is_playing.new_chart(return_dict);
         });
+      });
+
+    //Compare with
+    //Choose to show
+    $('#typecompare a').on('click', function(e){
+        var selText = $(this).text();
+        var last3 = selText.slice(-3);
+        if(last3 == '-pt'){
+            $("#btncompare").text("Compare with: FIR/"+ selText);
+        }else if(selText == "Butterworth"){
+            $("#btncompare").text("Compare with: "+ selText);
+        }else if(selText == "DC Filted"){
+            $("#btncompare").text("Compare with: "+ selText);
+        }else if(selText == "RAW"){
+
+            $("#btncompare").text("Compare with: "+ selText);
+        }else{
+            $("#btncompare").text("Compare with: OFF");
+        }
       });
   
    
