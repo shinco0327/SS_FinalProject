@@ -45,10 +45,23 @@
     {% include 'navbar.html' %}
 
     <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" >
-            <h1 class="h2">History</h1>
-            <h4 class="mb-2 mb-md-0" id="currentTime">Loading</h4>
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" >
+        <div class="container-fluid">
+          <div class="row">
+            <h1 class="h2  col-xs-12 col-md-9">Realtime</h1>
+            <div class=" col-xs-12 col-md-3 border" id="Heartcol">
+              <div class="row">
+                <div class="col-md-4" >
+                  <h6 class="mb-2 font-weight-light">Heartrate</h6>
+                </div>
+                <div class="col-md-8">
+                  <h4 class="mb-2 " id="heartpresent">Standby...</h4>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
         <div class="container float-left hide" id="detailPage">
           <button type="button" id="btn_backtable" class="btn btn-dark mr-2 mb-2" >Back</button>

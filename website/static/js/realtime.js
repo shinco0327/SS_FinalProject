@@ -495,18 +495,9 @@
     if(interval_10 >= 1){
       interval_10 = 0;
       update_spectrum();
+      check_alive();
       //sync_time();
     }
-    
-    
-    
-    interval_100 += 1;
-    if(interval_100 >= 19){
-      //$("#Graphcollapse0").collapse("hide");
-      interval_100 = 0;
-      check_alive();
-    }
-    
     if(is_recording == true){
       $("#btn_record0").hide();
       $("#btn_recording0").show();
@@ -515,11 +506,8 @@
       $("#btn_record0").show();
       $("#btn_recording0").hide();
     }
-  
   }, 500);
 
- 
-  
   //---------------------------------------------------------
   //Record Grpah
   var is_recording = false;
