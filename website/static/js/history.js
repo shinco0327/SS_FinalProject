@@ -8,18 +8,18 @@
     $(".table tbody tr").click(function(){
         $("#tablePage").hide();
         $("#detailPage").show();
-        $("#recrodname").text("Record Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].record_name); 
-        $("#subjectname").text("Subject Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].subject_name); 
-        $("#time").text("Time: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].time); 
-        if(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].remarks != ""){
+        $("#recrodname").text("Record Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].record_name); 
+        $("#subjectname").text("Subject Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].subject_name); 
+        $("#time").text("Time: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].time); 
+        if(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].remarks != ""){
             $("#remarks").show();
-            $("#remarks").text("Remarks: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].remarks);}
+            $("#remarks").text("Remarks: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].remarks);}
         else{
             $("#remarks").hide();
         }
         is_playing.reset_graph(); 
-        is_playing.new_record(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7]._id,
-        historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*7].count);
+        is_playing.new_record(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8]._id,
+        historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].count);
         //alert($(this).attr('id'));
     });
 
@@ -92,6 +92,7 @@
             this.past_timestamp = 0;
             this.record_oid = record_oid;
             this.GraphMode = "RAW";
+            this.comparemode = 'OFF';
             this.total_length = total_length;
             this.play_state = 0;
         }
@@ -135,14 +136,39 @@
                 borderWidth: 4,
                 pointBackgroundColor: '#007bff',  
                 data: []
-                }]
-            };
+                },{
+                    lineTension: 0,
+                    backgroundColor: 'transparent',
+                    borderColor: '#FFA500',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#FFA500',  
+                    data: []
+                    }]
+            
+            }
             
             var myLineChart = new Chart(this.ctx , {
                 type: "line",
                 data: this.data,
                 options: this.options 
             });
+        }
+        compare_Graph(GraphMode){
+            this.count = 0;
+            this.past_seconds = -1;
+            this.comparemode = GraphMode
+            this.past_timestamp = 0;
+            if(this.play_state == 1){
+                this.btnplay.hide();
+                this.btnpause.show();
+                this.btnrestrt.show();
+                this.play_state = 1;
+            }else{
+                this.btnplay.show();
+                this.btnpause.hide();
+                this.btnrestrt.hide();
+                this.play_state = 0;
+            }
         }
         change_GraphMode(GraphMode){
             this.count = 0;
@@ -209,17 +235,28 @@
             }
             console.log(label);
             console.log(return_dict.value);
+            var compare_list = []
+            if(this.comparemode != 'OFF'){
+                compare_list = return_dict.comparevalue;
+            }
             this.data = {
                 labels: label,
-                datasets: [{
-                    
+                datasets: [{  
                 lineTension: 0,
                 backgroundColor: 'transparent',
                 borderColor: '#007bff',
                 borderWidth: 4,
                 pointBackgroundColor: '#007bff',  
                 data: return_dict.value
-                }]
+                }, 
+                {
+                    lineTension: 0,
+                    backgroundColor: 'transparent',
+                    borderColor: '#FFA500',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#FFA500',  
+                    data: compare_list
+                    }]
             };
             
             var myLineChart = new Chart(this.ctx , {
@@ -263,6 +300,12 @@
                     this.   data.datasets[0].data.splice(0, 70);
                 }
             }
+            if(return_dict.comparevalue != [] && this.comparemode != 'OFF'){
+                this.data.datasets[1].data.push.apply(this.data.datasets[1].data, return_dict.comparevalue); 
+                if(this.data.datasets[1].data.length > 500){
+                    this.   data.datasets[1].data.splice(0, 70);
+                }
+            }
             
             
             var myLineChart = new Chart(this.ctx , {
@@ -273,7 +316,7 @@
             
         }
         gettoJson(){
-            return {record_oid: this.record_oid, count: this.count, graphmode: this.GraphMode, interval:0.5}
+            return {record_oid: this.record_oid, count: this.count, graphmode: this.GraphMode, comparemode: this.comparemode,interval:0.5}
         }
         end(){
             this.count = 0;
@@ -284,7 +327,7 @@
         }
     };
 
-    var is_playing = new PlayControl($("#btnplay"), $("#btnpause"), $("#btnrestart"), document.getElementById("myChart"));
+    var is_playing = new PlayControl($("#btnplay"), $("#btnpause"), $("#btnrestart"), document.getElementById("myChart").getContext("2d"));
     
     
     $("#btnplay").on('click', function(e){
@@ -341,16 +384,25 @@
         var last3 = selText.slice(-3);
         if(last3 == '-pt'){
             $("#btncompare").text("Compare with: FIR/"+ selText);
+            is_playing.compare_Graph("LPFpt"+selText.substring(0, selText.length - 3));
         }else if(selText == "Butterworth"){
+            is_playing.compare_Graph("LPFButter");
             $("#btncompare").text("Compare with: "+ selText);
         }else if(selText == "DC Filted"){
+            is_playing.compare_Graph("DCF");
             $("#btncompare").text("Compare with: "+ selText);
         }else if(selText == "RAW"){
-
+            is_playing.compare_Graph("RAW");
             $("#btncompare").text("Compare with: "+ selText);
         }else{
+            is_playing.compare_Graph("OFF");
             $("#btncompare").text("Compare with: OFF");
         }
+        $.getJSON('/gethistorygraph', is_playing.gettoJson()
+            ,function(return_dict){ 
+                is_playing.reset_graph();
+                is_playing.new_chart(return_dict);
+        });
       });
   
    
@@ -381,9 +433,14 @@
     $('#btn_nextpage').on('click', function(e){
         page ++;
         $("#btn_lastpage").show();
-        var pointer_save = listpointer
+        var pointer_save = listpointer;
+        pointer_save ++;
         for( var i in historylist){ 
             if(i == 8){
+                if(parseInt(i)+parseInt(pointer_save) >= historylist.length ){
+                    $("#btn_nextpage").hide();
+                    $("#t"+i).hide();
+                }
                 break;
             }
             //$("#t"+i).removeClass("hide");
@@ -405,12 +462,12 @@
         page --;
         $("#btn_nextpage").show();
         var pointer_save = listpointer;
-        if(listpointer%7 == 0){
-            pointer_save -= 14;
+        if(listpointer%7 == 1){
+            pointer_save -= 15;
         }
         else{
             pointer_save -= listpointer%7;
-            pointer_save -= 7;
+            pointer_save -= 6;
         }
         if(pointer_save == 0){
             $("#btn_lastpage").hide();

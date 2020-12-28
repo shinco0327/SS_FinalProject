@@ -269,6 +269,7 @@ def gethistorygraph():
     record_oid = ObjectId(str1_record_oid)
     json_record_oid = JSONEncoder().encode(record_oid)
     graphmode = request.args.get('graphmode', type=str)
+    comparemode = request.args.get('comparemode', 'OFF',type=str)
     interval = request.args.get('interval', 0.5,type=float)
     if count == None or graphmode == None:
         return jsonify(record_oid=None, count=0, value=[], time=[])
@@ -288,6 +289,7 @@ def gethistorygraph():
             valuelist.append(i.get('value', None))
             timelist.append(datetime.datetime.timestamp(i.get('time', None)))
     fix_valuelist = []
+    comparelist = []
     if(graphmode == "RAW"):
         fix_valuelist = valuelist
     else:
@@ -302,7 +304,23 @@ def gethistorygraph():
             elif(graphmode[0:5] == "LPFpt"):
                 filt_list = [1/int(graphmode[5:]) for i in range(int(graphmode[5:]))]
                 fix_valuelist = signal.lfilter(filt_list, 1, fix_valuelist).tolist()
-    return jsonify(count=count+len(valuelist), value=fix_valuelist, time=timelist)
+    if(comparemode == 'OFF'):
+        return jsonify(count=count+len(valuelist), value=fix_valuelist, time=timelist)
+    elif(comparemode == "RAW"):
+        comparelist = valuelist
+    else:
+        comparelist = (valuelist - np.mean(valuelist))
+        if(comparemode == "DCF"):
+            comparelist = comparelist.tolist()
+        elif(comparemode[0:3] == "LPF"):
+            if(comparemode == "LPFButter"):
+                fs = 1/(abs(timelist[0] - timelist[-1])/len(valuelist))
+                sos = signal.butter(10, 10, 'lp', fs=fs, output='sos')
+                comparelist = signal.sosfilt(sos, comparelist).tolist()
+            elif(comparemode[0:5] == "LPFpt"):
+                filt_list = [1/int(comparemode[5:]) for i in range(int(comparemode[5:]))]
+                comparelist = signal.lfilter(filt_list, 1, comparelist).tolist()
+    return jsonify(count=count+len(valuelist), value=fix_valuelist, comparevalue=comparelist, time=timelist)
 #-------------------------------------------------------------------------------
 @app.route('/savechartrecord')
 def savechartrecord():
