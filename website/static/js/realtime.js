@@ -533,6 +533,8 @@
   var stop_record =function(e){
     is_recording = false;
     reference_end = count;
+    $("#record_name").val("");
+    $("#remarks").val("");
     $("#SaveModal").modal('show');
     $("#record_name").val("record"+Date.now());
     /* var record_name = prompt("Please enter name of this record", "record"+Date.now());

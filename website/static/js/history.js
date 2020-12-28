@@ -460,19 +460,18 @@
     
     $('#btn_lastpage').on('click', function(e){
         page --;
-        $("#btn_nextpage").show();
-        var pointer_save = listpointer;
-        if(listpointer%7 == 1){
-            pointer_save -= 15;
+        $("#btn_nextpage").show();                               
+        var pointer_save = listpointer; 
+        if(listpointer%8 == 0){
+            pointer_save -= 16;
         }
         else{
-            pointer_save -= listpointer%7;
-            pointer_save -= 6;
+            pointer_save -= listpointer%8;
+            pointer_save -= 8;
         }
         if(pointer_save == 0){
             $("#btn_lastpage").hide();
         }
-        
         for( var i in historylist){ 
             if(i == 8){
                 break;
