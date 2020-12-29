@@ -516,7 +516,6 @@
   var heartrate_stable = 0;
   $('#btn_record0').on('click', function(e){
     is_recording = true;
-    heartrate_store = [];
     heartrate_stable = 0;
     if(data.datasets[0].data != []){
       record_start_position = count - data.datasets[0].data.length;

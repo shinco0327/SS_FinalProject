@@ -10,6 +10,11 @@
         $("#detailPage").show();
         $("#recrodname").text("Record Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].record_name); 
         $("#subjectname").text("Subject Name: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].subject_name); 
+        if(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].heartrate > 50){
+            $("#heartrate").text("Heartrate: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].heartrate.toFixed(2)); 
+        }else{
+            $("#heartrate").text("Heartrate: Did Not Measure"); 
+        }
         $("#time").text("Time: "+historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].time); 
         if(historylist[parseInt($(this).attr('id').substring(1))+parseInt(page)*8].remarks != ""){
             $("#remarks").show();
@@ -424,6 +429,11 @@
                 $("#t"+i+"recordname").text(historylist[i].record_name); 
                 $("#t"+i+"subjectname").text(historylist[i].subject_name); 
                 $("#t"+i+"time").text(historylist[i].time);
+                if(historylist[i].heartrate > 50){
+                    $("#t"+i+"heartrate").text(historylist[i].heartrate.toFixed(2)); 
+                }else{
+                    $("#t"+i+"heartrate").text("Didn't Measure"); 
+                }
                 listpointer = i; 
             }
         }); 
@@ -450,6 +460,11 @@
                 $("#t"+i+"recordname").text(historylist[parseInt(i)+parseInt(pointer_save)].record_name); 
                 $("#t"+i+"subjectname").text(historylist[parseInt(i)+parseInt(pointer_save)].subject_name); 
                 $("#t"+i+"time").text(historylist[parseInt(i)+parseInt(pointer_save)].time);
+                if(historylist[parseInt(i)+parseInt(pointer_save)].heartrate > 50){
+                    $("#t"+i+"heartrate").text(historylist[parseInt(i)+parseInt(pointer_save)].heartrate.toFixed(2)); 
+                }else{
+                    $("#t"+i+"heartrate").text("Didn't Measure"); 
+                }
                 listpointer = parseInt(i)+parseInt(pointer_save); 
             }else{
                 $("#btn_nextpage").hide();
@@ -462,8 +477,12 @@
         page --;
         $("#btn_nextpage").show();                               
         var pointer_save = listpointer; 
+        console.log(pointer_save)
         if(listpointer%8 == 0){
             pointer_save -= 16;
+            if(pointer_save < 0){
+                pointer_save = 0;
+            }
         }
         else{
             pointer_save -= listpointer%8;
@@ -481,6 +500,11 @@
             $("#t"+i+"recordname").text(historylist[parseInt(i)+parseInt(pointer_save)].record_name); 
             $("#t"+i+"subjectname").text(historylist[parseInt(i)+parseInt(pointer_save)].subject_name); 
             $("#t"+i+"time").text(historylist[parseInt(i)+parseInt(pointer_save)].time);
+            if(historylist[parseInt(i)+parseInt(pointer_save)].heartrate > 50){
+                $("#t"+i+"heartrate").text(historylist[parseInt(i)+parseInt(pointer_save)].heartrate.toFixed(2)); 
+            }else{
+                $("#t"+i+"heartrate").text("Didn't Measure"); 
+            }
             listpointer = parseInt(i)+parseInt(pointer_save); 
         }
     });
