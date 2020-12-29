@@ -37,6 +37,8 @@ while 1:
         print(e)
         print("Can't sync time")
 
+print(server_time_diff)
+
 conn = pymongo.MongoClient('mongodb://128.199.118.43:27017/', username='sam',password='mongo23392399',authSource='admin',authMechanism='SCRAM-SHA-256')
 
 update_dict = []
@@ -48,7 +50,7 @@ thread_push_mongo.start()
 while 1:
     try:
         data = float(ser.readline())
-        update_dict.append({'value':data ,'time':datetime.fromtimestamp(time.time())})
+        update_dict.append({'value':data ,'time':datetime.now()+server_time_diff})
         print(data)
     except Exception as e:
         if e == KeyboardInterrupt:
