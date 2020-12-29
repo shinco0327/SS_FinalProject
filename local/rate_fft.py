@@ -13,12 +13,13 @@ recent_reading = collections.deque([0, 0, 0, 0 , 0], maxlen=5)
 ava_rate =  collections.deque([0, 0, 0], maxlen=3)
 while 1:
     try:
-        datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=5)}}).max_time_ms(500))
+        datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=5)}}).sort('time', -1).max_time_ms(500))
         #datalist = list(db.real_time.find({}).sort('_id', -1).limit(400))
-        if datalist == []:
+        if datalist == [] or datalist == None:
             continue
         valuelist = []
         timelist = []
+        datalist.reverse()
         for i in datalist:
             valuelist.append(i.get('value', 0))
             timelist.append(datetime.datetime.timestamp(i.get('time', None)))
