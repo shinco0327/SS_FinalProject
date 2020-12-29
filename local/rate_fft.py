@@ -24,8 +24,8 @@ while 1:
             timelist.append(datetime.datetime.timestamp(i.get('time', None)))
         fs = 1/(abs(timelist[-1] - timelist[0])/len(timelist))
         f = np.arange(0, fs, fs/len(timelist))
-        valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
-        value_fft = np.fft.fft(valuelist)
+        #valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
+        value_fft = np.fft.fft(valuelist-np.mean(valuelist))
         x_skip = 0
         for i in f:
             if(i < 0.92):

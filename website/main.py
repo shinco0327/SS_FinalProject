@@ -454,8 +454,8 @@ def thread_calt_heart_rate(db):
             global glob_fs 
             glob_fs = fs
             f = np.arange(0, fs, fs/len(timelist))
-            valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
-            value_fft = np.fft.fft(valuelist)
+            #valuelist = signal.lfilter([1/3, 1/3, 1/3], 1, (valuelist - np.mean(valuelist)))
+            value_fft = np.fft.fft(valuelist-np.mean(valuelist))
             x_skip = 0
             for i in f:
                 if(i < 0.92):
@@ -474,8 +474,10 @@ def thread_calt_heart_rate(db):
                         heartrate = {'heartrate': 0, 'mode': 'measuring'}
                         break
                 else:
-                    heartrate = {'heartrate': "%.2f" % rate, 'mode': 'done'}
-            
+                    if(rate <= 220):
+                        heartrate = {'heartrate': "%.2f" % rate, 'mode': 'done'}
+                    else:
+                        heartrate = {'heartrate': 0, 'mode': 'measuring'}
         except Exception as e:
             print(e)
             pass
