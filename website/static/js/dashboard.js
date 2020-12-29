@@ -28,19 +28,38 @@
           $('#btnRealtime').removeClass('disabled');
           if(data.heartrate.mode == 'disconnect'){
             $('#heartpresent').text('Internet Unstable');
+            $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
             $('#heartbpm').hide();
           }
           else if(data.heartrate.mode == 'standby'){
             $('#heartpresent').text('Standby...');
+            $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
             $('#heartbpm').hide();
           }
           else if(data.heartrate.mode == 'measuring'){
             $('#heartpresent').text('Measuring...');
+            heartrate_store = [];
+            $("#Heartcol").css("background-color", 'rgba(255,255,255,' + 1 + ')');
             $('#heartbpm').hide();
           }
           else if(data.heartrate.mode == 'done'){
             $('#heartpresent').text(data.heartrate.heartrate);
             $('#heartbpm').show();
+            heartrate_store.push(data.heartrate.heartrate);
+            if(heartrate_store.length > 50){
+              heartrate_store.splice(0, 1);
+              var temporary = data.heartrate;
+              var total = 0;
+              for(var i in heartrate_store){
+                total += parseInt(heartrate_store[i]);
+                if(Math.abs(temporary - heartrate_store[i]) >= 5){
+                  break;
+                }
+                if(i == heartrate_store.length - 1){
+                  $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
+                }
+              }
+            }
           }
         });
         
@@ -48,6 +67,7 @@
       }
     });
   };
+  var  heartrate_store = [];
   check_alive_and_rate()
 
 

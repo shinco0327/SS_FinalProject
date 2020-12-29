@@ -626,24 +626,26 @@
             $('#heartpresent').text(data.heartrate.heartrate +" bpm");
             
             heartrate_store.push(data.heartrate.heartrate);
-            if(heartrate_store.length > 50){
+            if(heartrate_store.length > 25){
               heartrate_store.splice(0, 1);
               var temporary = data.heartrate;
               var total = 0;
               for(var i in heartrate_store){
                 total += parseInt(heartrate_store[i]);
                 if(Math.abs(temporary - heartrate_store[i]) >= 5){
+                  heartrate_store = [temporary];
                   break;
                 }
                 if(i == heartrate_store.length - 1){
                   if(is_recording){
                     heartrate_stable = total/i;
                   }
+                  console.log("stable heartrate: "+total/i+"\nlist: "+heartrate_store);
                   //$("#Heartcol").addClass("border-success");
                   $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
                 }
               }
-              }
+            }
             
           }
         });
