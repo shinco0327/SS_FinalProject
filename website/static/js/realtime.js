@@ -419,10 +419,10 @@
       options.scales.yAxes[0].ticks.max = 1000;
     }else if(GraphMode == "DCF"){
       options.scales.yAxes[0].ticks.min = -5;
-      options.scales.yAxes[0].ticks.max = 8;
+      options.scales.yAxes[0].ticks.max = 10;
     }else if(GraphMode.substring(0,3) == "LPF"){
-      options.scales.yAxes[0].ticks.min = -5;
-      options.scales.yAxes[0].ticks.max = 8;
+      options.scales.yAxes[0].ticks.min = -2;
+      options.scales.yAxes[0].ticks.max = 5;
     }
     else{
       options.scales.yAxes[0].ticks.min = 0;
@@ -607,8 +607,7 @@
         $('#showoffline').hide();
         $("#Heartcol").show();
         $.getJSON('/getheartrate',{   
-        },function(data){     
-          
+        },function(data){       
           if(data.heartrate.mode == 'disconnect'){
             $('#heartpresent').text('Internet Unstable');
           }
@@ -637,9 +636,9 @@
                 }
                 if(i == heartrate_store.length - 1){
                   if(is_recording){
-                    heartrate_stable = total/i;
+                    heartrate_stable = data.heartrate.heartrate;
                   }
-                  console.log("stable heartrate: "+total/i+"\nlist: "+heartrate_store);
+                  console.log("stable heartrate: "+data.heartrate.heartrate+"\nlist: "+heartrate_store);
                   //$("#Heartcol").addClass("border-success");
                   $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
                 }

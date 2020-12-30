@@ -46,7 +46,7 @@
             $('#heartpresent').text(data.heartrate.heartrate);
             $('#heartbpm').show();
             heartrate_store.push(data.heartrate.heartrate);
-            if(heartrate_store.length > 50){
+            if(heartrate_store.length > 25){
               heartrate_store.splice(0, 1);
               var temporary = data.heartrate;
               var total = 0;

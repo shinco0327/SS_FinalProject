@@ -396,6 +396,15 @@ def realtime():
     return render_template('realtime.html')
 
 #-------------------------------------------------------------------------------
+#rore
+@app.route('/more')
+def more():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    return render_template('more.html')
+
+#-------------------------------------------------------------------------------
 #get calculated heart rated
 @app.route('/getheartrate')
 def getheartrate():
@@ -403,8 +412,16 @@ def getheartrate():
     if(db ==None):
         return redirect(url_for('login')) 
     global heartrate
-    return jsonify(heartrate=heartrate)
-
+    if(heartrate['time_domain'].get('mode', None) == 'done' and heartrate['freq_domain'].get('mode', None) == 'done'):   
+        rate_time = float(heartrate['time_domain'].get('heartrate', None))
+        rate_freq = float(heartrate['freq_domain'].get('heartrate', None))
+        if(abs(rate_time - rate_freq) < 10):
+            return jsonify(heartrate={'heartrate': "%.2f" % (float(rate_freq + rate_time)/2), 'mode': 'done'})
+        else:
+            return jsonify(heartrate=heartrate.get('time_domain', heartrate.get('freq_domain', None)))
+    else:
+        #print(heartrate.get('time_domain', heartrate.get('freq_domain', None)))
+        return jsonify(heartrate=heartrate.get('time_domain', heartrate.get('freq_domain', None)))
 #-------------------------------------------------------------------------------
 #get frequency response
 @app.route('/getfreqresponse')
@@ -432,7 +449,7 @@ def getfreqresponse():
 
 #-------------------------------------------------------------------------------
 #Thread will calculate heartrate
-heartrate = {'heartrate': 0, 'mode': 'unauth'}
+heartrate = {'freq_domain':{'heartrate': 0, 'mode': 'unauth'}, 'time_domain':{'heartrate': 0, 'mode': 'unauth'}}
 glob_fs = 125
 def thread_calt_heart_rate(db):
     global heartrate
@@ -443,7 +460,7 @@ def thread_calt_heart_rate(db):
             datalist = list(db.real_time.find({'time':{"$gte": datetime.datetime.now()-datetime.timedelta(seconds=5)}}).max_time_ms(500))
             #datalist = list(db.real_time.find({}).sort('_id', -1).limit(400))
             if datalist == []:
-                heartrate = {'heartrate': 0, 'mode': 'disconnect'}
+                heartrate['freq_domain'] = {'heartrate': 0, 'mode': 'disconnect'}
                 continue
             valuelist = []
             timelist = []
@@ -466,83 +483,21 @@ def thread_calt_heart_rate(db):
             rate = np.average(ava_rate)
             recent_reading.append(rate)
             if(rate > 800):
-                heartrate = {'heartrate': 0, 'mode': 'standby'}
+                heartrate['freq_domain'] = {'heartrate': 0, 'mode': 'standby'}
             else:
                 first_num = recent_reading[0]
                 for i in recent_reading:
                     if abs(first_num - i) > 10:
-                        heartrate = {'heartrate': 0, 'mode': 'measuring'}
+                        heartrate['freq_domain'] = {'heartrate': 0, 'mode': 'measuring'}
                         break
                 else:
                     if(rate <= 220):
-                        heartrate = {'heartrate': "%.2f" % rate, 'mode': 'done'}
+                        heartrate['freq_domain'] = {'heartrate': "%.2f" % rate, 'mode': 'done'}
                     else:
-                        heartrate = {'heartrate': 0, 'mode': 'measuring'}
+                        heartrate['freq_domain'] = {'heartrate': 0, 'mode': 'measuring'}
         except Exception as e:
             print(e)
-            pass
-    """ recentReading = [0, 0, 0, 0, 0, 0, 0, 0]
-    HeartrateBuff = collections.deque([0, 0, 0, 0, 0, 0, 0, 0], maxlen=8)
-    ava_rate = collections.deque([0, 0, 0], maxlen=3)
-    lastRead = 0
-    lastBeattime = time.time()
-    lastreturntime = time.time()
-    Recenttrend = 0
-    readingsIndex = 0
-    while 1:
-        firstlist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=2))}}).limit(1))
-        last_oid = None
-        if(firstlist == [] or firstlist[0].get('_id', None) == None):
-            heartrate = {'heartrate': 0, 'mode': 'disconnect'}
-            continue
-        else:
-            last_oid = firstlist[0].get('_id', None)
-          
-
-        if(firstlist[0].get('time', None) == None):
-            lastBeattime = time.time()
-        else:
-            lastBeattime = datetime.datetime.timestamp(firstlist[0].get('time', None))
-
-        heartrate = {'heartrate': 0, 'mode': 'measuring'}
-
-
-        while 1:
-            try:
-                datalist = list(db.real_time.find({"_id":{"$gt": last_oid}}).max_time_ms(300).limit(50))
-            except:
-                break
-            for data in datalist:
-                newRead = data.get('value', 0)
-                #print(newRead)
-                delta = newRead - lastRead
-                lastRead = newRead
-
-                #Recenttrend = Recenttrend - np.mean(recentReading) + delta
-                Recenttrend = Recenttrend - recentReading[readingsIndex] + delta
-                recentReading[readingsIndex] = delta
-                readingsIndex = (readingsIndex + 1) % len(recentReading)
-                #print(Recenttrend)
-            
-                if(Recenttrend >= 1.95 and datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime >= 0.150):
-                    #print(60/(time.time()-lastBeattime))
-                    currenHearttrate = 60/(datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))-lastBeattime)
-                    HeartrateBuff.append(currenHearttrate)
-                    avg = np.average(HeartrateBuff)
-                    lastBeattime = datetime.datetime.timestamp(data.get('time', datetime.datetime.now()))
-                    if(currenHearttrate < 200 and currenHearttrate > 50):
-                        ava_rate.append(currenHearttrate)
-                        #print("BEAT: ", "%.2f" % np.average(ava_rate))
-                        heartrate = {'heartrate': "%.2f" % np.average(ava_rate), 'mode': 'done'}
-                        lastreturntime = time.time()
-            if(time.time() - lastreturntime >= 5):
-                heartrate = {'heartrate': 0, 'mode': 'measuring'}
-                break
-
-            if(datalist != []):
-                last_oid = datalist[-1].get("_id", None) """
-    
-        
+            pass     
 #-------------------------------------------------------------------------------
 #Thread will detect device offline
 alive = False
@@ -561,6 +516,83 @@ def thread_checkalive(db):
         alive = False if (offline_count >= 4) else True
         time.sleep(2.5)
 #-------------------------------------------------------------------------------
+def thread_time_heart_rate(db):
+    global heartrate
+    thread_list = collections.deque(maxlen=20)
+    heart_list = collections.deque(maxlen=10)
+    last_beat_time = time.time()
+    recent_read = collections.deque(maxlen=8)
+    while(1):
+        firstlist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=1))}}))
+        last_oid = None
+        if(firstlist == [] or firstlist[-1].get('_id', None) == None):
+            continue
+        else:
+            last_oid = firstlist[-1].get('_id', None)
+
+        if(firstlist[0].get('time', None) == None):
+            continue
+        else:
+            lasttime = datetime.datetime.timestamp(firstlist[0].get('time', datetime.datetime.now()))
+
+
+        time_rate_go_up = 0
+        past_t = 0
+        while 1:
+            try:
+                x_time = []
+                y_value = []
+                datalist = list(db.real_time.find({"_id":{"$gt": last_oid}}).max_time_ms(500).limit(200))
+                if(datalist == []):
+                    if(datetime.datetime.timestamp(datetime.datetime.now() )-lasttime > 20):
+                        heartrate['time_domain'] = {'heartrate': 0, 'mode': 'disconnect'}
+                        break
+                    continue
+                for i in datalist:
+                    x_time.append(datetime.datetime.timestamp(i.get('time',datetime.datetime.now())))
+                    y_value.append(i.get('value', 0))
+                filt_list = [1/int(13) for i in range(int(13))]
+                y_filt = signal.lfilter(filt_list, 1, (y_value - np.mean(y_value))).tolist()
+                grad = np.gradient(y_filt)*5
+                for i in range(len(y_filt)):
+                    if(len(heart_list) > 0 and len(heart_list) < 10):
+                        heartrate['time_domain'] = {'heartrate': 0, 'mode': 'measuring'}
+                    if grad[i] < 0.2 or (y_filt[i] - np.mean(thread_list) < 0.2):
+                        if time_rate_go_up != 0:
+                            if(x_time[i] - time_rate_go_up > 0.06):
+                                if(x_time[i] - past_t > 0.25 and x_time[i] - past_t < 1.1):
+                                    heart_list.append(60/(x_time[i] - past_t))
+                                    for ii in recent_read:
+                                        #print('xxxx ', abs(ii - np.average(heart_list)))
+                                        if(abs(ii - np.average(heart_list)) >= 5):
+                                            break
+                                    else:
+                                        heartrate['time_domain'] = {'heartrate': "%.2f" % np.average(heart_list), 'mode': 'done'}
+                                    last_beat_time = time.time()
+                                    recent_read.append(np.average(heart_list))
+                                #print(recent_read)
+                                past_t = x_time[i]
+                            time_rate_go_up = 0 
+                    else:
+                        if time_rate_go_up == 0:
+                            time_rate_go_up = x_time[i]
+                    thread_list.append(y_filt[i]) 
+                if(time.time() - last_beat_time > 5):
+                    heartrate['time_domain'] = {'heartrate': 0, 'mode': 'standby'}
+                    heart_list = collections.deque(maxlen=10)
+                
+                time.sleep(0.5)
+                
+
+                #calculate here!!!!!!!!!!!!!!!!!!!!!!!
+                if(datalist !=[]):
+                    last_oid = datalist[int(len(datalist)/2)].get("_id", None)
+                    lasttime = datetime.datetime.timestamp(datalist[-1].get('time', datetime.datetime.now()))
+            except Exception as e:
+                if e == KeyboardInterrupt:
+                    break
+                else:
+                    print(e)
 
 # 判斷自己執行非被當做引入的模組，因為 __name__ 這變數若被當做模組引入使用就不會是 __main__
 if __name__ == '__main__':
@@ -570,4 +602,7 @@ if __name__ == '__main__':
     t2 = threading.Thread(target=thread_checkalive, args=(conn['admin'],))
     t2.daemon = True
     t2.start()
+    t3 = threading.Thread(target=thread_time_heart_rate, args=(conn['admin'],))
+    t3.daemon = True
+    t3.start()
     app.run(host="0.0.0.0", port="5000", debug=True)
