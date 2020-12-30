@@ -41,6 +41,10 @@
       xAxes: [{
         ticks: {
           autoSkip: false
+        },
+        scaleLabel: {
+          display: true,
+          labelString: 'Time (sec)'
         }
       }],
       yAxes: [{
@@ -80,6 +84,10 @@
       xAxes: [{
         ticks: {
           autoSkip: true
+        },
+        scaleLabel: {
+          display: true,
+          labelString: 'Frequency (Hz)'
         }
       }],
       yAxes: [{
@@ -624,7 +632,7 @@
             $('#heartpresent').text(data.heartrate.heartrate +" bpm");
             
             heartrate_store.push(data.heartrate.heartrate);
-            if(heartrate_store.length > 25){
+            if(heartrate_store.length > 20){
               heartrate_store.splice(0, 1);
               var temporary = data.heartrate;
               var total = 0;
@@ -636,9 +644,21 @@
                 }
                 if(i == heartrate_store.length - 1){
                   if(is_recording){
-                    heartrate_stable = data.heartrate.heartrate;
+                    heartrate_stable = (
+                      parseFloat(data.heartrate.heartrate) + 
+                      parseFloat(heartrate_store[heartrate_store.length - 1]) + 
+                      parseFloat(heartrate_store[heartrate_store.length - 2])
+                      + 
+                      parseFloat(heartrate_store[heartrate_store.length - 3]) + 
+                      parseFloat(heartrate_store[heartrate_store.length - 4]))/5;
                   }
-                  console.log("stable heartrate: "+data.heartrate.heartrate+"\nlist: "+heartrate_store);
+                  console.log("stable heartrate: "+(
+                    parseFloat(data.heartrate.heartrate) + 
+                    parseFloat(heartrate_store[heartrate_store.length - 1]) + 
+                    parseFloat(heartrate_store[heartrate_store.length - 2])
+                    + 
+                    parseFloat(heartrate_store[heartrate_store.length - 3]) + 
+                    parseFloat(heartrate_store[heartrate_store.length - 4]))/5+"\nlist: "+heartrate_store);
                   //$("#Heartcol").addClass("border-success");
                   $("#Heartcol").css("background-color", 'rgba(22,161,22,' + 0.58 + ')');
                 }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="author" content="Yu Shan Huang, special thanks to Bootstrap developers">
     <meta name="generator" content="Jekyll v4.1.1">
     <title>Signal & System Final</title>
     <link rel="apple-touch-icon" sizes="180x180" href="{{url_for('static',filename='images/apple-touch-icon.png')}}">
@@ -75,50 +75,52 @@
               <h5 class="mr-4 font-weight-light border" id="remarks" >Remarks: None</h5>
             </div>
           </div>
+          
+          <div class="dropdown ">
+            <button class="btn btn-primary dropdown-toggle mr-2 mb-2" type="button" id="btntypegraph" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Graph Type: RAW
+            </button>
+            <ul class="dropdown-menu" id="typeofgraph" aria-labelledby="btntypegraph">
+              <li><a class="dropdown-item" >RAW</a></li>
+              <li><a class="dropdown-item" >DC Filted</a></li>
+              <h6 class="dropdown-header">FIR Point Average</h6>
+              <li><a class="dropdown-item" >3-pt</a></li> 
+              <li><a class="dropdown-item" >5-pt</a></li> 
+              <li><a class="dropdown-item" >7-pt</a></li>
+              <li><a class="dropdown-item" >9-pt</a></li>
+              <li><a class="dropdown-item" >11-pt</a></li>
+              <li><a class="dropdown-item" >15-pt</a></li>
+              <h6 class="dropdown-header">Butterworth</h6>
+              <li><a class="dropdown-item" >Butterworth</a><li>
+            </ul>
+          </div>
+          <div class="dropdown ">
+            <button class="btn btn-warning dropdown-toggle mb-2" type="button" id="btncompare" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Compare with: Off
+            </button>
+            <ul class="dropdown-menu" id="typecompare" aria-labelledby="btncompare">
+              <li><a class="dropdown-item font-weight-bold" >OFF</a></li>
+              <li><a class="dropdown-item" >RAW</a></li>
+              <li><a class="dropdown-item" >DC Filted</a></li>
+              <h6 class="dropdown-header">FIR Point Average</h6>
+              <li><a class="dropdown-item" >3-pt</a></li> 
+              <li><a class="dropdown-item" >5-pt</a></li> 
+              <li><a class="dropdown-item" >7-pt</a></li>
+              <li><a class="dropdown-item" >9-pt</a></li>
+              <li><a class="dropdown-item" >11-pt</a></li>
+              <li><a class="dropdown-item" >15-pt</a></li>
+              <h6 class="dropdown-header">Butterworth</h6>
+              <li><a class="dropdown-item" >Butterworth</a><li>
+            </ul>
+          </div>
+            
+          
           <div class="row">
-            <div class="dropdown mb-2 col">
-              <button class="btn btn-primary dropdown-toggle" type="button" id="btntypegraph" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Graph Type: RAW
-              </button>
-              <ul class="dropdown-menu" id="typeofgraph" aria-labelledby="btntypegraph">
-                <li><a class="dropdown-item" >RAW</a></li>
-                <li><a class="dropdown-item" >DC Filted</a></li>
-                <h6 class="dropdown-header">FIR Point Average</h6>
-                <li><a class="dropdown-item" >3-pt</a></li> 
-                <li><a class="dropdown-item" >5-pt</a></li> 
-                <li><a class="dropdown-item" >7-pt</a></li>
-                <li><a class="dropdown-item" >9-pt</a></li>
-                <li><a class="dropdown-item" >11-pt</a></li>
-                <li><a class="dropdown-item" >15-pt</a></li>
-                <h6 class="dropdown-header">Butterworth</h6>
-                <li><a class="dropdown-item" >Butterworth</a><li>
-              </ul>
+            <div class="chart-container mb-2 border col-xs-12 col-md-10" style="position: relative;" >
+                <canvas class="my-4" id="myChart"></canvas>
             </div>
-            
-            <div class="dropdown mb-2 col">
-              <button class="btn btn-warning dropdown-toggle" type="button" id="btncompare" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Compare with: Off
-              </button>
-              <ul class="dropdown-menu" id="typecompare" aria-labelledby="btncompare">
-                <li><a class="dropdown-item font-weight-bold" >OFF</a></li>
-                <li><a class="dropdown-item" >RAW</a></li>
-                <li><a class="dropdown-item" >DC Filted</a></li>
-                <h6 class="dropdown-header">FIR Point Average</h6>
-                <li><a class="dropdown-item" >3-pt</a></li> 
-                <li><a class="dropdown-item" >5-pt</a></li> 
-                <li><a class="dropdown-item" >7-pt</a></li>
-                <li><a class="dropdown-item" >9-pt</a></li>
-                <li><a class="dropdown-item" >11-pt</a></li>
-                <li><a class="dropdown-item" >15-pt</a></li>
-                <h6 class="dropdown-header">Butterworth</h6>
-                <li><a class="dropdown-item" >Butterworth</a><li>
-              </ul>
-            </div>
-            
           </div>
-          <div class="chart-container mb-2 border" style="position: relative;" >
-            <canvas class="my-4" id="myChart"></canvas>
-          </div>
+        
           <div class="btn-toolbar">
             <button type="button" id="btnplay" class="btn btn-primary mr-2 mb-2" >Play</button>
             <button type="button" id="btnpause" class="btn btn-warning mr-2 mb-2 hide" >Pause</button>

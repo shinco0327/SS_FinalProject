@@ -256,7 +256,7 @@ def getspectrum():
     fftlist = abs(fftlist).tolist()
     
     return jsonify(value= fftlist[:int(len(fftlist)/2)], freq= freqlist[:int(len(freqlist)/2)])
-    #-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #return  raw data 
 @app.route('/gethistorygraph', methods=['GET', 'POST'])
 def gethistorygraph():
@@ -321,6 +321,71 @@ def gethistorygraph():
                 filt_list = [1/int(comparemode[5:]) for i in range(int(comparemode[5:]))]
                 comparelist = signal.lfilter(filt_list, 1, comparelist).tolist()
     return jsonify(count=count+len(valuelist), value=fix_valuelist, comparevalue=comparelist, time=timelist)
+#-------------------------------------------------------------------------------
+@app.route('/peakfinder', methods=['GET', 'POST'])
+def peakfinder():
+    user,db = check_user()
+    if(db ==None):
+        return redirect(url_for('login')) 
+    count = request.args.get("count", type=int)
+    global alive
+    if alive == False:
+        return jsonify(count=0, value=[], peak=[], time=[], start_oid=[])
+    if count == 0:
+        firstlist = list(db.real_time.find({'time':{'$gte': (datetime.datetime.now() - datetime.timedelta(seconds=2))}}))
+        if(firstlist == [] or firstlist[-1].get('_id', None) == None):
+            return jsonify(count=0, value=[], peak=[], time=[], start_oid=[])
+        else:
+            start_oid = firstlist[0].get('_id', None)
+    else:
+        str_start_oid = request.args.get('start_oid', type=str)
+        str1_start_oid =  str_start_oid.replace("\"", "")
+        start_oid = ObjectId(str1_start_oid)
+    datalist = list(db.real_time.find({"_id":{"$gte": start_oid}}).skip(count).max_time_ms(500).limit(200))
+    if(datalist == []):
+        return jsonify(count=count, value=[], peak=[], time=[], start_oid=JSONEncoder().encode(start_oid))
+    try:
+        x_time = []
+        y_value = []
+        for i in datalist:
+            x_time.append(datetime.datetime.timestamp(i.get('time',None)))
+            y_value.append(i.get('value', 0))
+
+        filt_list = [1/int(13) for i in range(int(13))]
+        y_filt = signal.lfilter(filt_list, 1, (y_value - np.mean(y_value))).tolist()
+        g_list = []
+        thread_list = collections.deque(maxlen=20)
+        grad = np.gradient(y_filt)*5
+        time_rate_go_up = 0
+        past_t = x_time[0]
+        for i in range(len(y_filt)):
+            #print(grad[i])
+            if grad[i] < 0.2 or (y_filt[i] - np.mean(thread_list) < 0.2):    
+                if time_rate_go_up != 0:
+                    if(x_time[i] - time_rate_go_up > 0.06):
+                        g_list.append(3)
+                        """ if(x_time[i] - past_t > 0.25):
+                            g_list.append(3) """
+                        past_t = x_time[i]
+                    time_rate_go_up = 0 
+                else:
+                    g_list.append(-3)
+            else:
+                g_list.append(-3)
+                if time_rate_go_up == 0:
+                    time_rate_go_up = x_time[i]
+            thread_list.append(y_filt[i]) 
+        
+        json_start_oid = JSONEncoder().encode(start_oid)
+        count += len(y_value)
+        return jsonify(count=count, value=y_filt, peak=g_list, time=x_time, start_oid=json_start_oid)
+    except Exception as e:
+        print(e)
+        return jsonify(count=count, value=[], peak=[], time=[], start_oid=JSONEncoder().encode(start_oid))  
+    
+    
+    
+    
 #-------------------------------------------------------------------------------
 @app.route('/savechartrecord')
 def savechartrecord():
@@ -419,6 +484,8 @@ def getheartrate():
             return jsonify(heartrate={'heartrate': "%.2f" % (float(rate_freq + rate_time)/2), 'mode': 'done'})
         else:
             return jsonify(heartrate=heartrate.get('time_domain', heartrate.get('freq_domain', None)))
+    elif(heartrate['time_domain'].get('mode', None) == 'done' and heartrate['freq_domain'].get('mode', None) != 'done'):
+        return jsonify(heartrate=heartrate.get('freq_domain', heartrate.get('freq_domain', None)))  
     else:
         #print(heartrate.get('time_domain', heartrate.get('freq_domain', None)))
         return jsonify(heartrate=heartrate.get('time_domain', heartrate.get('freq_domain', None)))

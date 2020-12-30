@@ -64,7 +64,11 @@
                   xAxes: [{
                     ticks: {
                       autoSkip: false
-                    }
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Time (sec)'
+                      }
                   }],
                   yAxes: [{
                     ticks: {
