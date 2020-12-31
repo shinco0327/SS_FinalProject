@@ -481,14 +481,18 @@ def getheartrate():
         rate_time = float(heartrate['time_domain'].get('heartrate', None))
         rate_freq = float(heartrate['freq_domain'].get('heartrate', None))
         if(abs(rate_time - rate_freq) < 10):
+            print("XXXXX:  Both")
             return jsonify(heartrate={'heartrate': "%.2f" % (float(rate_freq + rate_time)/2), 'mode': 'done'})
         else:
             return jsonify(heartrate=heartrate.get('time_domain', heartrate.get('freq_domain', None)))
+            print("XXXXX:  time_domain")
     elif(heartrate['time_domain'].get('mode', None) == 'done' and heartrate['freq_domain'].get('mode', None) != 'done'):
         return jsonify(heartrate=heartrate.get('freq_domain', heartrate.get('freq_domain', None)))  
+        print("XXXXX:  Freq")
     else:
         #print(heartrate.get('time_domain', heartrate.get('freq_domain', None)))
         return jsonify(heartrate=heartrate.get('time_domain', heartrate.get('freq_domain', None)))
+        print("XXXXX:  Time")
 #-------------------------------------------------------------------------------
 #get frequency response
 @app.route('/getfreqresponse')
